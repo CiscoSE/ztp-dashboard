@@ -8,13 +8,13 @@ Dashboard to manage zero touch provisioning configurations and automated upgrade
 The on-boarding of devices into the network can be challenging. It can require manual configuration, and that increases the risk of human error.
 Upgrading to newer software images can also be quite complex, and testing that everything work as expected is rarely automated.
 
-Zero Touch Provisioning (ZTP) for XR and Power On Auto-Provisioning (POAP) for Nexus, can make this easier. Since this processes automate the 
-on-boarding of devices, you are able to do the initial software install and the day0 configuration without human intervention.
+Zero Touch Provisioning (ZTP) for XR and Power On Auto-Provisioning (POAP) for Nexus, can make this easier. Since these processes automate the 
+on-boarding of devices, you are able to do the initial software install and the day-0 configuration without human intervention.
 
 However, configuring ZTP and POAP in your environment requires knowledge around DHCP, HTTP and other tools. Also, if you want to do upgrades for 
 devices already present in the network, you still need to manually save the configuration of the device and do the reboot with the correct options.
 
-In addition to that, ZTP and POAP does not include automated tests.
+Finally, ZTP and POAP do not include automated tests.
 
 ## Proposed Solution
 
@@ -26,9 +26,7 @@ In order to enable customers to fully take advantage of ZTP and POAP, an applica
 * Tests (ping or telemetry)
 * Notifications 
 
-The solution will help operators to configure HTTP, DHCP or TFTP from a single portal, without the need of extensive knowledge around how these technologies work.
-
-In addition to the above, since everything is managed from a single point, alerts with extensive descriptions 
+The solution will help operators to configure HTTP, DHCP or TFTP from a single portal, without the need of extensive knowledge around how these technologies work. Since everything is managed from a single point, alerts with extensive descriptions 
 can be sent to monitoring tools when troubleshooting needs to be done.
 
 ### Cisco Products Technologies/ Services
