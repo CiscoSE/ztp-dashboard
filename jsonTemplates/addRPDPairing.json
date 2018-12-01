@@ -1,0 +1,19 @@
+{
+  "setRpdPairingList": [
+    {
+      "approvalState": "Approved",
+      "assignedCores": [
+        {{range .AssignedCores}}
+        {
+          "coreMgmtIpAddress": "{{.CoreMgmtIpAddress}}",
+          "serviceType":"Data"
+
+        }
+        {{end}}
+      ],
+      "macAddress": "{{.MacAddress}}",
+      "preConfigure": false,
+      "serviceTemplate": "{{.ServiceTemplate}}"
+    }
+  ]
+}

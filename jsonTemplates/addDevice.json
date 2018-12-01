@@ -1,0 +1,91 @@
+{
+  "inv_key_type": 2,
+  "uuid": "",
+  "inventory_id": "",
+  "node_ip": {
+    "inet_af": 1,
+    "inet_addr": "{{.IP}}"
+  },
+  "mac": "",
+  "serial_number": "",
+  "host_name": "{{.Hostname}}",
+  "profile": "{{.CredentialProfile}}",
+  "managed_state": 2,
+  "connectivity_info": [
+    {
+      "type": 8,
+      "ipaddrs": [
+        {
+          "inet_af": 1,
+          "inet_addr": "{{.IP}}"
+        }
+      ],
+      "port": 23
+    },
+    {
+      "type": 9,
+      "ipaddrs": [
+        {
+          "inet_af": 1,
+          "inet_addr": "{{.IP}}"
+        }
+      ],
+      "port": 161
+    },
+    {
+      "type": 6,
+      "ipaddrs": [
+        {
+          "inet_af": 1,
+          "inet_addr": "{{.IP}}"
+        }
+      ],
+      "port": 22
+    }
+  ],
+  "group": [
+    "GROUP_SNMP;GROUP_ALL"
+  ],
+  "product_info": {
+    "software_type": "IOS-XE",
+    "software_version": "16.7",
+    "product_type": "CBR-8-CCAP-CHASS",
+    "product_family": "Cisco",
+    "product_series": "Cisco",
+    "manufacturer": "Cisco",
+    "cli_yang_model_ver": "16.6",
+    "provider": "NSO",
+    "capability": [
+      "SNMP"
+    ]
+  },
+  "geo_info": {
+    "coordinates": {
+      "longitude": null,
+      "latitude": null,
+      "altitude": null
+    },
+    "building": "",
+    "street": "",
+    "city": "",
+    "state": "",
+    "country": "",
+    "region": "",
+    "zip": "",
+    "range_incr": {
+      "longitude": null,
+      "latitude": null,
+      "altitude": null
+    }
+  },
+  "routing_info": {
+    "global_isis_system_id": "",
+    "global_ospf_router_id": "",
+    "router_loopback": {
+      "inet_af": 1,
+      "inet_addr": ""
+    },
+    "mgmt_intf_ip": [],
+    "mgmt_vrf": ""
+  }
+}

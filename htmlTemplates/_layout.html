@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html class="cui" lang="en" id="styleguide">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ZTP Dashboard</title>
+
+    <link rel="stylesheet" href="/assets/css/animate.css">
+    <link rel="stylesheet" href="/assets/css/cui-styleguide.min.css">
+    <link rel="stylesheet" href="/assets/css/featherlight.min.css">
+    <link rel="icon" href="/assets/img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/css/site.css">
+    <link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+
+    <script src="/assets/js/jquery-3.0.0.js"></script>
+    <script src="/assets/js/styleguide.js"></script>
+    <script src="/assets/js/jquery-scrollto.js"></script>
+    <script src="/assets/js/clipboard.js"></script>
+    <script src="/assets/js/featherlight.min.js"></script>
+    <script src="/assets/js/Markdown.Converter.js"></script>
+    <script src="/assets/js/lodash.core.js"></script>
+
+
+    <!-- AngularJS -->
+    <script src="/assets/js/angular-1.6.0/angular.min.js"></script>
+    <script src="/assets/js/angular-1.6.0/angular-route.min.js"></script>
+    <script src="/assets/js/angular-1.6.0/angular-animate.min.js"></script>
+
+    <script src="/assets/js/site.js"></script>
+
+    <base href="/web/">
+</head>
+<body class="styleguide" ng-app="appModule">
+
+<div class="content-fluid" ng-controller="AppController">
+    {{template "_default_menu.html"}}
+
+    <main>
+        <header id="styleguideHeader" class="header header--compressed">
+            <div class="header-bar container">
+                <a class="btn btn--small btn--icon toggle-menu">
+                    <span class="icon-list-menu"></span>
+                </a>
+                <a class="header-bar__logo" href="http://www.cisco.com" target="_blank">
+                    <span class="icon-cisco"></span>
+                </a>
+                <div class="header-bar__main">
+                    <div class="header-heading">
+
+                        <h1 class="page-title">ZTP Dashboard <sup class="text-large hidden-xs">0.1</sup></h1>
+
+                    </div>
+                    <div ng-if="loading">
+                        <div class="loading-dots loading-dots--info">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-toolbar">
+                    <a class="btn btn--small btn--icon"
+                       href="mailto:sfloresk@cisco.com?Subject=Feedback" title="Submit Feedback">
+                        <span class="icon-feedback"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="alert alert--danger animated fadeInLeft" ng-if="error != ''">
+                <div class="alert__icon icon-error"></div>
+                <div class="alert__message">{a error a}</div>
+                <div class="alert__close icon-close" ng-click="clearError();"></div>
+            </div>
+            <div class="alert alert--success animated fadeInLeft" ng-if="success != ''">
+                <div class="alert__icon icon-success"></div>
+                <div class="alert__message">{a success a}</div>
+                <div class="alert__close icon-close" ng-click="clearSuccess();"></div>
+            </div>
+        </header>
+        {{template "content"}}
+
+    </main>
+</div>
+</body>
+
+
+<script src="/assets/js/angular-modules/app.js"></script>
+</html>
+

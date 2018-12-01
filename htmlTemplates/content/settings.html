@@ -1,0 +1,99 @@
+<div class="content">
+    <div class="hero hero--indigo">
+        <div class="hero__content">
+            <div class="container center-xs">
+                <div class="row">
+                    <div class="col-md-12 col-xl-12">
+                        <div class="flex-fluid">
+                            <h1>Settings</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <h2 class="text-blue base-margin-bottom">DHCP</h2>
+                <p>DHCPv4 configurations</p>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="host" ng-model="ncsztp.host">
+                                <label for="host">Network</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="serial" ng-model="ncsztp.serial">
+                                <label for="serial">DNS Server</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <h2 class="text-blue base-margin-bottom">Situation Manager</h2>
+                <p>Situation manager allows you to monitor errors in the network while reducing your overall main time
+                    to resolved those issues.</p>
+                <p>Add the URL in order to activate the integration</p>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="host" ng-model="ncsztp.host">
+                                <label for="host">URL</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <h2 class="text-blue base-margin-bottom">Webex Teams</h2>
+                <p>Add a webex teams room to receive real-time notificaitons. The token can only be changed via env
+                    variables</p>
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="host" ng-model="ncsztp.host">
+                                <label for="host">Room ID</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="col-md-12">
+                <br />
+                <button class="btn btn--primary" style="float:right" ng-click="addNcsZtp()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
