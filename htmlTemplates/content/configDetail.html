@@ -1,0 +1,71 @@
+<div class="content">
+    <div class="hero hero--indigo">
+        <div class="hero__content">
+            <div class="container center-xs">
+                <div class="row">
+                    <div class="col-md-12 col-xl-12">
+                        <div class="flex-fluid">
+                            <h1 ng-if="configAction == 'create'">New configuration</h1>
+                            <h1 ng-if="configAction != 'create'">Configuration {a currentConfig.name a}</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="name" ng-model="currentConfig.name">
+                                <label for="name">Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group__text select ">
+                                <select id="selDeviceType" name="selDeviceType" ng-options="item.name for item in deviceTypes"
+                                    ng-model="currentConfig.deviceType">
+                                </select>
+
+                                <label for="selDeviceType">Device Type
+
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <h2 class="text-blue base-margin-bottom">Configuration</h2>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <textarea id="config" ng-model="currentConfig.configuration" style="height:300px"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="col-md-12">
+                <br />
+                <button class="btn btn--primary" style="float:right" ng-click="submitConfig()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

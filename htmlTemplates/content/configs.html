@@ -5,7 +5,7 @@
                 <div class="row">
                     <div class="col-md-12 col-xl-12">
                         <div class="flex-fluid">
-                            <h1>Devices</h1>
+                            <h1>Configurations</h1>
                         </div>
                     </div>
                 </div>
@@ -19,9 +19,10 @@
                 <div class="row">
                     <div class="col-md-12">
                             <button class="btn btn--icon btn--success"
-                            ng-click="go('devices/detail')" style="float:right"><span class="icon-add"></span></button>    
+                            ng-click="go('configs/detail')"
+                             style="float:right"><span class="icon-add"></span></button>    
                         
-                            <h2 class="text-blue base-margin-bottom">Device List</h2> 
+                            <h2 class="text-blue base-margin-bottom">Config List</h2> 
                             
                             <hr>
                         
@@ -30,20 +31,17 @@
                                 <thead>
                                     <tr>
                                         <th></th>
-                                        <th>Host</th>
-                                        <th>Model</th>
-                                        <th>Serial</th>
-                                        <th>Fixed IP</th>
-
+                                        <th>Name</th>
+                                        <th>Device Type</th>
+                                        <th>URL</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="device in devices">
+                                    <tr ng-repeat="config in configs">
                                         <td></td>
-                                        <td>{a device.hostname a}</td>
-                                        <td>{a device.deviceType.name a}</td>
-                                        <td>{a device.serial a}</td>
-                                        <td>{a device.fixedIp a}</td>
+                                        <td>{a config.name a}</td>
+                                        <td>{a config.deviceType.name a}</td>
+                                        <td>{a serverUrl a}{a config.locationUrl a}</td>
                                     </tr>
                                 </tbody>
                             </table>

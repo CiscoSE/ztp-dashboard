@@ -18,8 +18,11 @@ func main() {
 	templates := populateTemplates()
 
 	controller.Startup(templates, r)
-	log.Println("Listening in http://0.0.0.0:8080/web/")
-	http.ListenAndServe(":8080", r)
+	log.Println("Listening in http://0.0.0.0:" + os.Getenv("APP_WEB_PORT") + "/web/")
+	err := http.ListenAndServe(":"+os.Getenv("APP_WEB_PORT"), r)
+	if err != nil {
+		log.Fatalln("Failed to start web server: " + err.Error())
+	}
 }
 
 func populateTemplates() map[string]*template.Template {
@@ -37,6 +40,8 @@ func populateTemplates() map[string]*template.Template {
 		panic("Failed to read contents of content directory: " + err.Error())
 	}
 	for _, fi := range fis {
+		// DEBUG:
+		//log.Print("Reading html template file " + fi.Name())
 		f, err := os.Open(basePath + "/content/" + fi.Name())
 		if err != nil {
 			panic("Failed to open template '" + fi.Name() + "'")

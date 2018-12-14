@@ -103,3 +103,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+public/scripts
+public/configs
+public/images
+debug
+dhcpd.conf
+dhcpd6.conf

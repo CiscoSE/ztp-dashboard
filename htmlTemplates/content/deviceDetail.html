@@ -5,7 +5,8 @@
                 <div class="row">
                     <div class="col-md-12 col-xl-12">
                         <div class="flex-fluid">
-                            <h1>Device Details</h1>
+                            <h1 ng-if="deviceAction == 'create'">New device</h1>
+                            <h1 ng-if="deviceAction != 'create'">Device {a currentDevice.hostname a}</h1>
                         </div>
                     </div>
                 </div>
@@ -22,14 +23,17 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="host" ng-model="ncsztp.host">
-                                <label for="host">Serial Number</label>
+                                <input id="serial" ng-model="currentDevice.serial">
+                                <label for="serial">Serial</label>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="form-group__text">
-                                <input id="serial" ng-model="ncsztp.serial">
-                                <label for="serial">Model</label>
+                            <div class="form-group__text select ">
+                                <select id="selDeviceType" name="selDeviceType" ng-options="item.name for item in deviceTypes"
+                                    ng-model="currentDevice.deviceType">
+                                </select>
+                                <label for="selDeviceType">Device Type
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -47,15 +51,13 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="host" ng-model="ncsztp.host">
+                                <input id="host" ng-model="currentDevice.hostname">
                                 <label for="host">Hostname</label>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-12">
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="host" ng-model="ncsztp.host">
+                                <input id="host" ng-model="currentDevice.fixedIp">
                                 <label for="host">Management IP</label>
                             </div>
                         </div>
@@ -69,22 +71,31 @@
     <div class="container">
         <div class="section">
             <div class="panel panel--loose panel--bordered">
-                <h2 class="text-blue base-margin-bottom">Onboarding</h2>
-                
+                <h2 class="text-blue base-margin-bottom">Provisioning</h2>
+
                 <hr>
 
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-12" ng-if="!currentDevice.deviceType">
+                        <p>Please select a device type</p>
+                    </div>
+                    <div class="col-md-12" ng-if="currentDevice.deviceType">
                         <div class="form-group">
-                            <div class="form-group__text">
-                                <input id="host" ng-model="ncsztp.host">
-                                <label for="host">Image</label>
+                            <div class="form-group__text select ">
+                                <select id="selImage" name="selImage" ng-options="item.name for item in images | filter: checkDeviceTypeSelected"
+                                    ng-model="currentDevice.image">
+                                </select>
+                                <label for="selImage">Image
+                                </label>
                             </div>
                         </div>
                         <div class="form-group">
-                            <div class="form-group__text">
-                                <input id="host" ng-model="ncsztp.host">
-                                <label for="host">Day 0 Script</label>
+                            <div class="form-group__text select ">
+                                <select id="selConfig" name="selConfig" ng-options="item.name for item in configs | filter: checkDeviceTypeSelected"
+                                    ng-model="currentDevice.config">
+                                </select>
+                                <label for="selConfig">Configuration
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -97,7 +108,7 @@
         <div class="section">
             <div class="col-md-12">
                 <br />
-                <button class="btn btn--primary" style="float:right" ng-click="addNcsZtp()">Save</button>
+                <button class="btn btn--primary" style="float:right" ng-click="submitDevice()">Save</button>
             </div>
         </div>
     </div>

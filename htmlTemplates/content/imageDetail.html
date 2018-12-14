@@ -1,0 +1,69 @@
+<div class="content">
+    <div class="hero hero--indigo">
+        <div class="hero__content">
+            <div class="container center-xs">
+                <div class="row">
+                    <div class="col-md-12 col-xl-12">
+                        <div class="flex-fluid">
+                            <h1 ng-if="imageAction == 'create'">New image</h1>
+                            <h1 ng-if="imageAction != 'create'">Image {a currentConfig.name a}</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="name" ng-model="currentImage.name" ng-enabled="false">
+                                <label for="name">Name</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-group__text select ">
+                                <select id="selDeviceType" name="selDeviceType" ng-options="item.name for item in deviceTypes"
+                                    ng-model="currentImage.deviceType">
+                                </select>
+                                <label for="selDeviceType">Device Type
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <h2 class="text-blue base-margin-bottom">Image File</h2>
+                <hr>
+                <form action="/api/images/file" method="post" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <input type="file" name="file" onchange="angular.element(this).scope().saveImageFile(this.files)" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="section">
+            <div class="col-md-12">
+                <br />
+                <button class="btn btn--primary" style="float:right" ng-click="submitImage()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
