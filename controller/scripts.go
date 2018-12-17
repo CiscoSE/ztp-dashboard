@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/CiscoSE/ztp-dashboard/model"
@@ -48,7 +49,7 @@ func (s ScriptController) GenerateNXPoapScript(device model.Device, isIPv6 bool)
 	poapConfig := &nxPoapConfig{
 		ServerIP:   serverIP,
 		ImageName:  device.Image.Name,
-		ConfigName: device.Config.Name,
+		ConfigName: device.Config.Name + ".conf",
 	}
 	t, err := template.ParseFiles(s.nxPythonTemplate)
 
@@ -105,4 +106,24 @@ func (s ScriptController) GenerateXRZtpScript(device model.Device, isIPv6 bool) 
 	if err != nil {
 		log.Printf("cannot write ztp script file: %v", err)
 	}
+}
+
+// RemoveAllScripts deletes all scripts from the web server
+func (s ScriptController) RemoveAllScripts() error {
+	d, err := os.Open(basePath + "/public/scripts/")
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, name := range names {
+		err = os.RemoveAll(filepath.Join(basePath+"/public/scripts/", name))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -23,14 +23,15 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="serial" ng-model="currentDevice.serial">
+                                <input id="serial" ng-model="currentDevice.serial" ng-disabled="deviceAction != 'create'">
                                 <label for="serial">Serial</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group__text select ">
-                                <select id="selDeviceType" name="selDeviceType" ng-options="item.name for item in deviceTypes"
-                                    ng-model="currentDevice.deviceType">
+                                <select id="selDeviceType" name="selDeviceType" ng-options="item.name for item in deviceTypes track by item.name"
+                                    ng-model="currentDevice.deviceType"
+                                    ng-disabled="deviceAction != 'create'">
                                 </select>
                                 <label for="selDeviceType">Device Type
                                 </label>
@@ -51,13 +52,13 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="host" ng-model="currentDevice.hostname">
+                                <input ng-disabled="deviceAction != 'create'" id="host" ng-model="currentDevice.hostname">
                                 <label for="host">Hostname</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="host" ng-model="currentDevice.fixedIp">
+                                <input ng-disabled="deviceAction != 'create'" id="host" ng-model="currentDevice.fixedIp">
                                 <label for="host">Management IP</label>
                             </div>
                         </div>
@@ -82,7 +83,7 @@
                     <div class="col-md-12" ng-if="currentDevice.deviceType">
                         <div class="form-group">
                             <div class="form-group__text select ">
-                                <select id="selImage" name="selImage" ng-options="item.name for item in images | filter: checkDeviceTypeSelected"
+                                <select id="selImage" name="selImage" ng-options="item.name for item in images | filter: checkDeviceTypeSelected track by item.name"
                                     ng-model="currentDevice.image">
                                 </select>
                                 <label for="selImage">Image
@@ -91,7 +92,7 @@
                         </div>
                         <div class="form-group">
                             <div class="form-group__text select ">
-                                <select id="selConfig" name="selConfig" ng-options="item.name for item in configs | filter: checkDeviceTypeSelected"
+                                <select id="selConfig" name="selConfig" ng-options="item.name for item in configs | filter: checkDeviceTypeSelected track by item.name"
                                     ng-model="currentDevice.config">
                                 </select>
                                 <label for="selConfig">Configuration
@@ -103,12 +104,42 @@
             </div>
         </div>
     </div>
-
-    <div class="container">
+    <div class="container" ng-if="deviceAction != 'create'">
         <div class="section">
-            <div class="col-md-12">
-                <br />
-                <button class="btn btn--primary" style="float:right" ng-click="submitDevice()">Save</button>
+            <div class="panel panel--loose panel--bordered">
+                <h2 class="text-danger base-margin-bottom">Danger Zone</h2>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="form-group__text">
+                                <input id="confirmdelete" ng-model="currentDevice.confirmdelete">
+                                <label for="confirmdelete">Type Device Serial to Delete. This cannot be undone</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn--negative" style="float:right" ng-click="removeDevice()" ng-disabled="currentDevice.confirmdelete != currentDevice.serial">
+                            Delete
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="container"></div>
+        <div class="container">
+            <div class="section">
+                <div class="col-md-12">
+                    <br />
+                    <button class="btn btn--primary" style="float:right" ng-click="submitDevice()">Save</button>
+                </div>
             </div>
         </div>
     </div>

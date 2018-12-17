@@ -38,7 +38,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr ng-repeat="device in devices">
+                                    <tr ng-repeat="device in devices" ng-click="selectDevice(device);">
                                         <td></td>
                                         <td>{a device.hostname a}</td>
                                         <td>{a device.deviceType.name a}</td>

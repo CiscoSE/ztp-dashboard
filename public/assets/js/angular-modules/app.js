@@ -205,6 +205,7 @@ appModule.controller('AppController', function ($scope, $location, $http) {
                 $scope.success = "Configuration added"
                 $scope.getConfigs();
                 $scope.go('configs')
+                $scope.currentConfig = {}
             })
             .catch(function (response, status, headers, config) {
                 $scope.error = response.data
@@ -267,12 +268,15 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             return;
         }
         $scope.devicesLoading = true;
-        $http
-            .post('/api/devices', $scope.currentDevice)
+
+        if ($scope.deviceAction === "edit"){
+            $http
+            .put('/api/devices', $scope.currentDevice)
             .then(function (response, status, headers, config) {
                 $scope.success = "Device added"
                 $scope.getDevices();
                 $scope.go('devices')
+                $scope.currentDevice = {}
             })
             .catch(function (response, status, headers, config) {
                 $scope.error = response.data
@@ -281,6 +285,53 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             .finally(function () {
 
             })
+        }
+        else {
+            $http
+            .post('/api/devices', $scope.currentDevice)
+            .then(function (response, status, headers, config) {
+                $scope.success = "Device added"
+                $scope.getDevices();
+                $scope.go('devices')
+                $scope.currentDevice = {}
+            })
+            .catch(function (response, status, headers, config) {
+                $scope.error = response.data
+                $scope.devicesLoading = false;
+            })
+            .finally(function () {
+
+            });
+        }
+    };
+
+    $scope.removeDevice = function () {
+        $scope.clearError();
+        $scope.clearSuccess();
+
+        $http
+        .delete('/api/devices?serial=' + $scope.currentDevice.serial)
+        .then(function (response, status, headers, config) {
+            $scope.success = "Device removed"
+            $scope.getDevices();
+            $scope.go('devices')
+            $scope.currentDevice = {}
+        })
+        .catch(function (response, status, headers, config) {
+            $scope.error = response.data
+            $scope.devicesLoading = false;
+        })
+        .finally(function () {
+
+        });
+    };
+
+
+
+    $scope.selectDevice = function(device){
+        $scope.currentDevice = angular.copy(device);
+        $scope.deviceAction = 'edit'
+        $scope.go('/devices/detail')
     };
 
     // Images
@@ -298,7 +349,7 @@ appModule.controller('AppController', function ($scope, $location, $http) {
                 $scope.imagesLoading = false;
             })
     };
-    $scope.getImages()
+    $scope.getImages();
 
     $scope.saveImageFile = function (files) {
         $scope.imageFile = files[0];
@@ -326,7 +377,8 @@ appModule.controller('AppController', function ($scope, $location, $http) {
 
                 $scope.success = "Image added"
                 $scope.getImages();
-                $scope.go('images')
+                $scope.go('images');
+                $scope.currentImage = {};
             })
             .catch(function (response, status, headers, config) {
                 $scope.error = response.data

@@ -197,6 +197,98 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		enc.Encode(devices)
 
 		break
+	case http.MethodPut:
+
+		// Decode the request body into an Device model.
+		dec := json.NewDecoder(r.Body)
+		device := &model.Device{}
+		err := dec.Decode(device)
+
+		if err != nil {
+			log.Print(err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Couldn't decode json:" + err.Error() + "\n"))
+			return
+		}
+
+		// Open database
+		session, err := n.db.OpenSession()
+		if err != nil {
+			log.Print("Cannot open database:" + err.Error() + "\n")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		defer session.Close()
+
+		dbCollection := session.DB("ztpDashboard").C("device")
+
+		// Update new device in Database (Image and day0 script)
+		err = dbCollection.Update(bson.M{"hostname": device.Hostname}, bson.M{"$set": bson.M{"config": device.Config}})
+
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Couldn't update in database:" + err.Error() + "\n"))
+			return
+		}
+
+		err = dbCollection.Update(bson.M{"hostname": device.Hostname}, bson.M{"$set": bson.M{"image": device.Image}})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Couldn't update in database:" + err.Error() + "\n"))
+			return
+		}
+
+		// Regenerate config file and restart dhcp service
+		go dhcpController.GenerateConfigFiles()
+
+		// Return ok message
+		w.Write([]byte("ok"))
+		break
+	case http.MethodDelete:
+		// Retrieve serial in request
+		queryString, present := r.URL.Query()["serial"]
+
+		if !present || len(queryString) != 1 {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Serial parameter not found"))
+		}
+		deviceSerial := queryString[0]
+
+		// Open database
+		session, err := n.db.OpenSession()
+		if err != nil {
+			log.Print("Cannot open database:" + err.Error() + "\n")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			return
+		}
+		defer session.Close()
+
+		dbCollection := session.DB("ztpDashboard").C("device")
+		count, err := dbCollection.Find(bson.M{"serial": deviceSerial}).Count()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Couldn't retrieve object from DB"))
+			return
+		}
+		if count != 1 {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Couldn't find single object to delete in DB"))
+			return
+		}
+		err = dbCollection.Remove(bson.M{"serial": deviceSerial})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Couldn't remove object from DB"))
+			return
+		}
+
+		// Regenerate dhcp and scripts
+		dhcpController.GenerateConfigFiles()
+
+		w.Write([]byte("Ok"))
+		break
 	}
 }
 

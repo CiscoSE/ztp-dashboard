@@ -74,9 +74,13 @@ func (d DhcpController) GenerateConfigFiles() {
 		log.Fatalf("Cannot get interface IPv6 addresses:" + err.Error() + "\n")
 	}
 	if localServerIPv4 == "" {
-		log.Print("Local IPv6 unknown, cannot build DHCPv6 configuration files correctly")
+		log.Fatalf("Local IPv6 unknown, cannot build DHCPv6 configuration files correctly")
 	}
 
+	err = d.scriptCtl.RemoveAllScripts()
+	if err != nil {
+		log.Print("Cannot clean scripts directory:" + err.Error() + "\n")
+	}
 	for _, item := range devices {
 		if item.DeviceType.Name == "iOS-XR" {
 			d.scriptCtl.GenerateXRZtpScript(item, govalidator.IsIPv6(item.Fixedip))
