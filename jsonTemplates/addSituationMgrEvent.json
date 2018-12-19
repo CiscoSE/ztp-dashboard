@@ -1,0 +1,12 @@
+{
+  "signature": "{{.Source}}::{{.Description}}",
+  "source_id": "ztp-dashboard.cisco.com",
+  "external_id": "ztp-dashboard.cisco.com",
+  "manager": "ZTP Dashboard",
+  "source": "{{.Source}}",
+  "class": "Zero Touch Provisioning",
+  "agent": "ZTP Dashboard",
+  "type": "Application",
+  "severity": "5",
+  "description": "{{.Description}}"
+}

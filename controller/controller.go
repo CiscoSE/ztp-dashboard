@@ -2,7 +2,6 @@ package controller
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 
@@ -10,6 +9,9 @@ import (
 )
 
 var basePath = os.Getenv("GOPATH") + "/src/github.com/CiscoSE/ztp-dashboard"
+
+const ErrorSeverity = "ERROR"
+const DebugSeverity = "DEBUG"
 
 var (
 	indexController index
@@ -20,6 +22,8 @@ var (
 	configsCtl      configController
 	scriptCtl       ScriptController
 	imagesCtl       imageController
+	WebexTeamsCtl   WebexTeamsController
+	SituationMgrCtl SituationMgrController
 )
 
 // Startup associates controllers with templates and routes
@@ -74,6 +78,10 @@ func Startup(templates map[string]*template.Template, r *mux.Router) {
 	dhcpController.scriptCtl.xrShellTemplate = basePath + "/shellTemplates/ztpXR.sh"
 	dhcpController.scriptCtl.nxPythonTemplate = basePath + "/pythonTemplates/poapNX.py"
 
+	// Integration
+	// Webex teams
+	WebexTeamsCtl.BaseURL = "https://api.ciscospark.com"
+
 	// Make sure that needed directories exists
 	CreateDirIfNotExist(basePath + "/public/configs")
 	CreateDirIfNotExist(basePath + "/public/images")
@@ -84,11 +92,15 @@ func Startup(templates map[string]*template.Template, r *mux.Router) {
 
 // CreateDirIfNotExist creates directories if not present
 func CreateDirIfNotExist(dir string) {
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.MkdirAll(dir, 0755)
-		if err != nil {
-			log.Fatal(err.Error())
-			panic(err)
+	_, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dir, 0755)
+			if err != nil {
+				go CustomLog("CreateDirIfNotExist (create directory): "+err.Error(), ErrorSeverity)
+			}
+		} else {
+			go CustomLog("CreateDirIfNotExist (check directory): "+err.Error(), ErrorSeverity)
 		}
 	}
 }

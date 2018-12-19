@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -52,34 +51,34 @@ func (d DhcpController) GenerateConfigFiles() {
 	// Open database
 	session, err := d.db.OpenSession()
 	if err != nil {
-		log.Fatalf("Cannot open database:" + err.Error() + "\n")
+		go CustomLog("GenerateConfigFiles (open database): "+err.Error(), ErrorSeverity)
 		return
 	}
 	defer session.Close()
 	dbCollection := session.DB("ztpDashboard").C("device")
 	err = dbCollection.Find(nil).All(&devices)
 	if err != nil {
-		log.Fatalf("Cannot read ztpDashboard database:" + err.Error() + "\n")
+		go CustomLog("GenerateConfigFiles (read database): "+err.Error(), ErrorSeverity)
 	}
 
 	localServerIPv4, err := d.interfacesCtl.GetFirstIPv4()
 	if err != nil {
-		log.Fatalf("Cannot get interface IPv4 addresses:" + err.Error() + "\n")
+		go CustomLog("GenerateConfigFiles (get IPv4 address): "+err.Error(), ErrorSeverity)
 	}
 	if localServerIPv4 == "" {
-		log.Print("Local IP4 unknown, cannot build DHCP configuration files correctly")
+		go CustomLog("GenerateConfigFiles (IPv4 address empty)", ErrorSeverity)
 	}
 	localServerIPv6, err := d.interfacesCtl.GetFirstIPv6()
 	if err != nil {
-		log.Fatalf("Cannot get interface IPv6 addresses:" + err.Error() + "\n")
+		go CustomLog("GenerateConfigFiles (get IPv6 address): "+err.Error(), ErrorSeverity)
 	}
 	if localServerIPv4 == "" {
-		log.Fatalf("Local IPv6 unknown, cannot build DHCPv6 configuration files correctly")
+		go CustomLog("GenerateConfigFiles (IPv6 address empty): "+err.Error(), ErrorSeverity)
 	}
 
 	err = d.scriptCtl.RemoveAllScripts()
 	if err != nil {
-		log.Print("Cannot clean scripts directory:" + err.Error() + "\n")
+		go CustomLog("GenerateConfigFiles (clean script directory): "+err.Error(), ErrorSeverity)
 	}
 	for _, item := range devices {
 		if item.DeviceType.Name == "iOS-XR" {
@@ -142,13 +141,13 @@ func (d DhcpController) GenerateConfigFiles() {
 		t, err := template.ParseFiles(hostTemplate)
 
 		if err != nil {
-			log.Printf("Could not get Templated parsed %v", err)
+			go CustomLog("GenerateConfigFiles (parse hostTemplate): "+err.Error(), ErrorSeverity)
 
 		}
 		buf1 := new(bytes.Buffer)
 		err = t.Execute(buf1, dhcpHost)
 		if err != nil {
-			log.Printf("Could not execute dhcp hosts config template: %v", err)
+			go CustomLog("GenerateConfigFiles (execute hostTemplate): "+err.Error(), ErrorSeverity)
 		}
 		if govalidator.IsIPv6(item.Fixedip) {
 			dhcp6Hosts += buf1.String()
@@ -169,24 +168,26 @@ func (d DhcpController) GenerateConfigFiles() {
 	}
 	t, err := template.ParseFiles(d.DhcpTemplate)
 	if err != nil {
-		log.Printf("Could not get Templated parsed %v", err)
+		go CustomLog("GenerateConfigFiles (parse dhcpTemplate): "+err.Error(), ErrorSeverity)
 	}
 	buf1 := new(bytes.Buffer)
 	err = t.Execute(buf1, dhcpConfig)
 	if err != nil {
-		log.Printf("Could not execute dhcp config template: %v", err)
+		go CustomLog("GenerateConfigFiles (execute dhcpTemplate): "+err.Error(), ErrorSeverity)
 	}
 	result := buf1.String()
 	err = ioutil.WriteFile(os.Getenv("DHCP_CONFIG_PATH"), []byte(strings.Replace(result, "&#34;", "\"", -1)), 0644)
 	if err != nil {
-		log.Printf("Could not write dhcp config file: %v", err)
+		go CustomLog("GenerateConfigFiles (write dhcp.conf file): "+err.Error(), ErrorSeverity)
 	}
-	log.Printf("Restarting DHCPv4 service using: %v", os.Getenv("DHCP_SERVICE_RESTART_CMD"))
+
+	go CustomLog("Restarting DHCPv4 service using: "+os.Getenv("DHCP_SERVICE_RESTART_CMD"), DebugSeverity)
+
 	out, err := exec.Command("bash", "-c", os.Getenv("DHCP_SERVICE_RESTART_CMD")).Output()
 	if err != nil {
-		log.Printf("Could not restart dhcp service: %v", err)
+		go CustomLog("GenerateConfigFiles (restart DHCP service): "+err.Error(), ErrorSeverity)
 	}
-	fmt.Printf("%s", out)
+	go CustomLog("Result: "+string(out), DebugSeverity)
 
 	// DHCPv6
 	dhcp6Config := &DhcpConfig{
@@ -199,25 +200,24 @@ func (d DhcpController) GenerateConfigFiles() {
 	}
 	t, err = template.ParseFiles(d.Dhcp6Template)
 	if err != nil {
-		log.Printf("Could not get dhcp6 templated parsed %v", err)
+		go CustomLog("GenerateConfigFiles (Parse Dhcp6 Template): "+err.Error(), ErrorSeverity)
 
 	}
 	buf1 = new(bytes.Buffer)
 	err = t.Execute(buf1, dhcp6Config)
 	if err != nil {
-		log.Printf("Could not execute dhcp6 config template: %v", err)
-
+		go CustomLog("GenerateConfigFiles (Execute Dhcp6 Template): "+err.Error(), ErrorSeverity)
 	}
 	result = buf1.String()
 	err = ioutil.WriteFile(os.Getenv("DHCP6_CONFIG_PATH"), []byte(strings.Replace(result, "&#34;", "\"", -1)), 0644)
 	if err != nil {
-		log.Printf("Could not write dhcp6 config file: %v", err)
+		go CustomLog("GenerateConfigFiles (wrote dhcp6 config file): "+err.Error(), ErrorSeverity)
 	}
+	go CustomLog("Restarting DHCPv6 service using:"+os.Getenv("DHCP6_SERVICE_RESTART_CMD"), DebugSeverity)
 
-	log.Printf("Restarting DHCPv6 service using: %v", os.Getenv("DHCP6_SERVICE_RESTART_CMD"))
 	out, err = exec.Command("bash", "-c", os.Getenv("DHCP6_SERVICE_RESTART_CMD")).Output()
 	if err != nil {
-		log.Printf("Could not restart dhcp6 service: %v", err)
+		go CustomLog("GenerateConfigFiles (restart DHCP6 service): "+err.Error(), ErrorSeverity)
 	}
-	fmt.Printf("%s", out)
+	go CustomLog("Result: "+string(out), DebugSeverity)
 }

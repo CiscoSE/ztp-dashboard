@@ -23,27 +23,29 @@
                     </div>
 
                     <div class="col-md-3 text-center">
-                        <h4>NX Configurations</h4>
+                        <h4>NX Devices</h4>
                         <br/>
-                        <span class="label label--circle label--goliath label--blue">2</span>
+                        <span class="label label--circle label--goliath label--blue">{a (devices | filter: getXrDevices).length a}</span>
 
                     </div>
 
                     <div class="col-md-3 text-center">
-                        <h4>XR Configurations</h4>
+                        <h4>XR Devices</h4>
                         <br/>
-                        <span class="label label--circle label--goliath label--warning">5</span>
+                        <span class="label label--circle label--goliath label--warning">{a (devices | filter: getNxDevices).length a}</span>
 
                     </div>
                     <div class="col-md-3 text-center">
                         <h4>Webex Teams</h4>
                         <br/>
-                        <span class="label label--circle label--goliath label--success icon-check"></span>
+                        <span ng-if="settings.WebexTeamsRoomID != ''" class="label label--circle label--goliath label--success icon-check"></span>
+                        <span ng-if="settings.WebexTeamsRoomID == ''" class="label label--circle label--goliath label--danger icon-close"></span>
                     </div>
                     <div class="col-md-3 text-center">
                         <h4>Situation Manager</h4>
                         <br/>
-                        <span class="label label--circle label--goliath label--danger icon-close"></span>
+                        <span ng-if="settings.situationMgrURL != ''" class="label label--circle label--goliath label--success icon-check"></span>
+                        <span ng-if="settings.situationMgrURL == ''" class="label label--circle label--goliath label--danger icon-close"></span>
                     </div>
                 </div>
             </div>

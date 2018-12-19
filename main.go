@@ -21,7 +21,8 @@ func main() {
 	log.Println("Listening in http://0.0.0.0:" + os.Getenv("APP_WEB_PORT") + "/web/")
 	err := http.ListenAndServe(":"+os.Getenv("APP_WEB_PORT"), r)
 	if err != nil {
-		log.Fatalln("Failed to start web server: " + err.Error())
+		controller.CustomLog("Failed to start web server: "+err.Error(), controller.ErrorSeverity)
+		os.Exit(1)
 	}
 }
 

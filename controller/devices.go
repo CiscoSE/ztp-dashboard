@@ -33,7 +33,7 @@ func (n deviceController) checkDeviceTypes() {
 	// Open database
 	session, err := n.db.OpenSession()
 	if err != nil {
-		log.Fatal("Cannot open database:" + err.Error() + "\n")
+		log.Fatal("Cannot open database: " + err.Error() + "\n")
 	}
 	defer session.Close()
 
@@ -41,7 +41,7 @@ func (n deviceController) checkDeviceTypes() {
 	dbCollection := session.DB("ztpDashboard").C("deviceType")
 	err = dbCollection.Find(nil).All(&deviceTypes)
 	if err != nil {
-		log.Fatal("Cannot read database table:" + err.Error() + "\n")
+		log.Fatal("Cannot read database table: " + err.Error() + "\n")
 	}
 
 	// Check if deviceTypes exist and have length greater than 0
@@ -57,7 +57,7 @@ func (n deviceController) createDeviceTypes() {
 	// Open database
 	session, err := n.db.OpenSession()
 	if err != nil {
-		log.Fatal("Cannot open database:" + err.Error() + "\n")
+		log.Fatal("Cannot open database: " + err.Error() + "\n")
 	}
 	defer session.Close()
 	dbCollection := session.DB("ztpDashboard").C("deviceType")
@@ -69,11 +69,11 @@ func (n deviceController) createDeviceTypes() {
 	// Insert new device types in Database
 	err = dbCollection.Insert(&deviceTypeXr)
 	if err != nil {
-		log.Fatal("Couldn't insert in database:" + err.Error() + "\n")
+		log.Fatal("Couldn't insert in database: " + err.Error() + "\n")
 	}
 	err = dbCollection.Insert(&deviceTypeNx)
 	if err != nil {
-		log.Fatal("Couldn't insert in database:" + err.Error() + "\n")
+		log.Fatal("Couldn't insert in database: " + err.Error() + "\n")
 	}
 }
 
@@ -97,16 +97,17 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Couldn't decode json:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (decode json): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Open database
 		session, err := n.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -116,9 +117,9 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		// Check if the name has been used before
 		count, err := dbCollection.Find(bson.M{"hostname": device.Hostname}).Count()
 		if err != nil {
-			log.Print("Cannot read device table:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if count > 0 {
@@ -130,9 +131,9 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		// Check if the serial has been used before
 		count, err = dbCollection.Find(bson.M{"serial": device.Serial}).Count()
 		if err != nil {
-			log.Print("Cannot read ncsztp table:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if count > 0 {
@@ -145,7 +146,8 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		count, err = dbCollection.Find(bson.M{"fixedip": device.Fixedip}).Count()
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Cannot read ncsztp table:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if count > 0 {
@@ -158,25 +160,30 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		err = dbCollection.Insert(&device)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't insert in database:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (insert database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Regenerate config file and restart dhcp service
 		go dhcpController.GenerateConfigFiles()
 
+		// Send notification
+		go WebexTeamsCtl.SendMessage("New device configuration added for " + device.Serial)
+
 		// Return ok message
 		w.Write([]byte("ok"))
 		break
 	case http.MethodGet:
+
 		var devices []model.Device
 
 		// Open database
 		session, err := n.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -184,9 +191,9 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 
 		err = dbCollection.Find(nil).All(&devices)
 		if err != nil {
-			log.Print("Cannot read database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
@@ -207,16 +214,17 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Couldn't decode json:" + err.Error() + "\n"))
+			w.Write([]byte("Couldn't decode json: " + err.Error() + "\n"))
+			go CustomLog("handleAPIDevices (decode json): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Open database
 		session, err := n.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -228,19 +236,24 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't update in database:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (update database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		err = dbCollection.Update(bson.M{"hostname": device.Hostname}, bson.M{"$set": bson.M{"image": device.Image}})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't update in database:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (update database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Regenerate config file and restart dhcp service
 		go dhcpController.GenerateConfigFiles()
+
+		// Send notification
+		go WebexTeamsCtl.SendMessage("Device " + device.Serial + " updated.")
 
 		// Return ok message
 		w.Write([]byte("ok"))
@@ -258,9 +271,9 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		// Open database
 		session, err := n.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -269,23 +282,29 @@ func (n deviceController) handleAPIDevices(w http.ResponseWriter, r *http.Reques
 		count, err := dbCollection.Find(bson.M{"serial": deviceSerial}).Count()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't retrieve object from DB"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if count != 1 {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Couldn't find single object to delete in DB"))
+			go CustomLog("handleAPIDevices (delete database): Couldn't find single object to delete in DB", ErrorSeverity)
 			return
 		}
 		err = dbCollection.Remove(bson.M{"serial": deviceSerial})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't remove object from DB"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevices (delete database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Regenerate dhcp and scripts
 		dhcpController.GenerateConfigFiles()
+
+		// Send notification
+		go WebexTeamsCtl.SendMessage("Device " + deviceSerial + " removed.")
 
 		w.Write([]byte("Ok"))
 		break
@@ -301,9 +320,9 @@ func (n deviceController) handleAPIDeviceTypes(w http.ResponseWriter, r *http.Re
 		// Open database
 		session, err := n.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDeviceTypes (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -312,7 +331,10 @@ func (n deviceController) handleAPIDeviceTypes(w http.ResponseWriter, r *http.Re
 		// Read database
 		err = dbCollection.Find(nil).All(&deviceTypes)
 		if err != nil {
-			log.Fatal(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDeviceTypes (read database): "+err.Error(), ErrorSeverity)
+			return
 		}
 		// If result is nil, return an empty slice
 		if deviceTypes == nil {

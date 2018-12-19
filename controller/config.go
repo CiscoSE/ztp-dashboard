@@ -49,16 +49,17 @@ func (c configController) handleAPIConfigs(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Couldn't decode json:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (decode json): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Open database
 		session, err := c.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -68,9 +69,9 @@ func (c configController) handleAPIConfigs(w http.ResponseWriter, r *http.Reques
 		// Check if the name has been used before
 		count, err := dbCollection.Find(bson.M{"name": config.Name}).Count()
 		if err != nil {
-			log.Print("Cannot read device table:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if count > 0 {
@@ -84,7 +85,8 @@ func (c configController) handleAPIConfigs(w http.ResponseWriter, r *http.Reques
 		err = ioutil.WriteFile(basePath+"/public/configs/"+config.Name+".conf", d1, 0644)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't save config in local disk:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (save config file to local disk): "+err.Error(), ErrorSeverity)
 			return
 		}
 
@@ -94,7 +96,8 @@ func (c configController) handleAPIConfigs(w http.ResponseWriter, r *http.Reques
 		err = dbCollection.Insert(&config)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't insert config in database:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (insert database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
@@ -109,9 +112,9 @@ func (c configController) handleAPIConfigs(w http.ResponseWriter, r *http.Reques
 		// Open database
 		session, err := c.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -119,9 +122,9 @@ func (c configController) handleAPIConfigs(w http.ResponseWriter, r *http.Reques
 
 		err = dbCollection.Find(nil).All(&configs)
 		if err != nil {
-			log.Print("Cannot read database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIConfigs (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if configs == nil {

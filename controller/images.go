@@ -24,7 +24,6 @@ func (i imageController) registerRoutes(r *mux.Router) {
 	r.HandleFunc("/ng/images", i.handleImages)
 	r.HandleFunc("/ng/images/detail", i.handleImagesDetail)
 	r.HandleFunc("/api/images", i.handleAPIImages)
-	r.HandleFunc("/api/images/file", i.handleAPIImagesFile)
 }
 
 // handleConfig will be executed when a request to /ng/images is done
@@ -37,37 +36,6 @@ func (i imageController) handleImagesDetail(w http.ResponseWriter, r *http.Reque
 	i.imageDetailTemplate.Execute(w, nil)
 }
 
-// handleAPIImages will be executed when a request to /api/images/file is done
-func (i imageController) handleAPIImagesFile(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	// If method is POST, save new image to disk
-	case http.MethodPost:
-		file, handle, err := r.FormFile("file")
-		if err != nil {
-			log.Print(err)
-			return
-		}
-		defer file.Close()
-		data, err := ioutil.ReadAll(file)
-
-		err = ioutil.WriteFile(basePath+"/public/images/"+handle.Filename, data, 0666)
-		if err != nil {
-			log.Print(err)
-			return
-		}
-		deviceType := r.FormValue("deviceType")
-		if err != nil {
-			log.Print(err)
-			return
-		}
-		log.Print(deviceType)
-		// Return ok message
-		w.Write([]byte("ok"))
-		break
-
-	}
-}
-
 // handleAPIImages will be executed when a request to /api/images is done
 func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -77,7 +45,6 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 		imageName := r.FormValue("name")
 
 		if deviceTypeName == "" || imageName == "" {
-			log.Print("Device Type and Image name are required")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Device Type and Image name are required"))
 			return
@@ -85,9 +52,10 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 
 		file, _, err := r.FormFile("file")
 		if err != nil {
-			log.Print("Cannot retrieve file from request:" + err.Error() + "\n")
+			log.Print(err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (retrieve file from request): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer file.Close()
@@ -95,18 +63,18 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 
 		err = ioutil.WriteFile(basePath+"/public/images/"+imageName, data, 0666)
 		if err != nil {
-			log.Print("Cannot save image file:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (save image file): "+err.Error(), ErrorSeverity)
 			return
 		}
 
 		// Open database
 		session, err := i.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -119,15 +87,14 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 		deviceTypes := dbCollection.Find(bson.M{"name": deviceTypeName})
 		deviceTypesCount, err := deviceTypes.Count()
 		if err != nil {
-			log.Print("Cannot read database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if deviceTypesCount == 0 {
-			log.Print("Invalid device type selected")
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("Invalid device type selected"))
 			return
 		}
 
@@ -136,15 +103,14 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 		// Check if the name has been used before
 		count, err := dbCollection.Find(bson.M{"name": imageName}).Count()
 		if err != nil {
-			log.Print("Cannot read image table:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (read database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		if count > 0 {
-			log.Print("Cannot read image table:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Cannot read image table:" + err.Error() + "\n"))
+			w.Write([]byte("Image name already in use"))
 			return
 		}
 
@@ -160,9 +126,9 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 		// Insert new configuration in Database
 		err = dbCollection.Insert(&image)
 		if err != nil {
-			log.Print("Couldn't insert image data in database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Couldn't insert image data in database:" + err.Error() + "\n"))
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (insert database): "+err.Error(), ErrorSeverity)
 			return
 		}
 
@@ -177,9 +143,9 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 		// Open database
 		session, err := i.db.OpenSession()
 		if err != nil {
-			log.Print("Cannot open database:" + err.Error() + "\n")
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (open database): "+err.Error(), ErrorSeverity)
 			return
 		}
 		defer session.Close()
@@ -187,7 +153,9 @@ func (i imageController) handleAPIImages(w http.ResponseWriter, r *http.Request)
 
 		err = dbCollection.Find(nil).All(&configs)
 		if err != nil {
-			panic(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIImages (read database): "+err.Error(), ErrorSeverity)
 		}
 		if configs == nil {
 			configs = []model.Config{}

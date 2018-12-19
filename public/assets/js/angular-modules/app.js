@@ -158,6 +158,10 @@ appModule.controller('AppController', function ($scope, $location, $http) {
     $scope.currentImage = {}
     $scope.imageFile = {};
 
+    // Settings variables
+    $scope.settings = {};
+    $scope.settingsLoading = false;
+
     // Common functions
     $scope.clearError = function () {
         $scope.error = "";
@@ -217,14 +221,24 @@ appModule.controller('AppController', function ($scope, $location, $http) {
     };
 
     // Devices
+
+    $scope.newDevice = function() {
+        $scope.currentDevice =  {};
+        $scope.deviceAction = "create";
+        $scope.go('devices/detail');
+    };
+
     $scope.checkDeviceTypeSelected = function(value, index, array) {
         if (!($scope.currentDevice.deviceType)){
             return false;
         }
         return value.deviceType.name === $scope.currentDevice.deviceType.name;
     };
-    $scope.xrImagesOnly = function(value, index, array) {
+    $scope.getXrDevices = function(value, index, array) {
         return value.deviceType.name === "iOS-XR";
+    };
+    $scope.getNxDevices = function(value, index, array) {
+        return value.deviceType.name === "NX-OS";
     };
 
     $scope.getDeviceTypes = function () {
@@ -389,4 +403,42 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             });
 
     };
+
+    // Settings 
+    $scope.getSettings = function () {
+        $scope.settingsLoading = true;
+        $http
+            .get('/api/settings')
+            .then(function (response, status, headers, config) {
+                $scope.settings = response.data;
+            })
+            .catch(function (response, status, headers, config) {
+                $scope.error = response.data
+            })
+            .finally(function () {
+                $scope.settingsLoading = false;
+            })
+    };
+    $scope.getSettings();
+
+    $scope.submitSettings = function () {
+        $scope.clearError();
+        $scope.clearSuccess();
+        $scope.settingsLoading = true;
+
+        $http
+        .post('/api/settings', $scope.settings)
+        .then(function (response, status, headers, config) {
+            $scope.success = "Settings updated"
+            $scope.getSettings();
+        })
+        .catch(function (response, status, headers, config) {
+            $scope.error = response.data;
+            $scope.settingsLoading = false;
+        })
+        .finally(function () {
+            
+        });
+    };
+
 });

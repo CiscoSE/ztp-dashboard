@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +29,7 @@ type nxPoapConfig struct {
 	ImageName  string
 }
 
+// GenerateNXPoapScript creates the day0 script for nexus devices
 func (s ScriptController) GenerateNXPoapScript(device model.Device, isIPv6 bool) {
 	var err error
 	var serverIP string
@@ -40,10 +40,11 @@ func (s ScriptController) GenerateNXPoapScript(device model.Device, isIPv6 bool)
 		serverIP, err = s.interfacesCtl.GetFirstIPv4()
 	}
 	if err != nil {
-		log.Fatalf("Cannot get interface IP addresses:" + err.Error() + "\n")
+		go CustomLog("GenerateNXPoapScript (get ServerIP): "+err.Error(), ErrorSeverity)
+		return
 	}
 	if serverIP == "" {
-		log.Print("Local IP unknown, cannot build shell script files")
+		go CustomLog("GenerateNXPoapScript (No local server IP. Cannot build POAP script)", ErrorSeverity)
 		return
 	}
 	poapConfig := &nxPoapConfig{
@@ -54,17 +55,17 @@ func (s ScriptController) GenerateNXPoapScript(device model.Device, isIPv6 bool)
 	t, err := template.ParseFiles(s.nxPythonTemplate)
 
 	if err != nil {
-		log.Printf("Could not get templated parsed %v", err)
+		go CustomLog("GenerateNXPoapScript (Parse nxPythonTemplate): "+err.Error(), ErrorSeverity)
 	}
 	buf1 := new(bytes.Buffer)
 	err = t.Execute(buf1, poapConfig)
 	if err != nil {
-		log.Printf("Could not execute NX python template: %v", err)
+		go CustomLog("GenerateNXPoapScript (Execute nxPythonTemplate): "+err.Error(), ErrorSeverity)
 	}
 	result := buf1.String()
 	err = ioutil.WriteFile(basePath+"/public/scripts/"+device.Serial+".py", []byte(strings.Replace(result, "&#34;", "\"", -1)), 0644)
 	if err != nil {
-		log.Printf("cannot write ztp script file: %v", err)
+		go CustomLog("GenerateNXPoapScript (Write"+device.Serial+".py into disk): "+err.Error(), ErrorSeverity)
 	}
 }
 
@@ -80,10 +81,11 @@ func (s ScriptController) GenerateXRZtpScript(device model.Device, isIPv6 bool) 
 	}
 
 	if err != nil {
-		log.Fatalf("Cannot get interface IP addresses:" + err.Error() + "\n")
+		go CustomLog("GenerateXRZtpScript (get ServerIP): "+err.Error(), ErrorSeverity)
+		return
 	}
 	if serverIP == "" {
-		log.Print("Local IP unknown, cannot build shell script files")
+		go CustomLog("GenerateXRZtpScript (No local server IP. Cannot build POAP script)", ErrorSeverity)
 		return
 	}
 	shellConfig := &xrZtpConfig{
@@ -94,17 +96,19 @@ func (s ScriptController) GenerateXRZtpScript(device model.Device, isIPv6 bool) 
 	t, err := template.ParseFiles(s.xrShellTemplate)
 
 	if err != nil {
-		log.Printf("Could not get Templated parsed %v", err)
+		go CustomLog("GenerateXRZtpScript (Parse xrShell Template): "+err.Error(), ErrorSeverity)
+		return
 	}
 	buf1 := new(bytes.Buffer)
 	err = t.Execute(buf1, shellConfig)
 	if err != nil {
-		log.Printf("Could not execute XR shell template: %v", err)
+		go CustomLog("GenerateXRZtpScript (Execute xrShell Template): "+err.Error(), ErrorSeverity)
+		return
 	}
 	result := buf1.String()
 	err = ioutil.WriteFile(basePath+"/public/scripts/"+device.Serial+".sh", []byte(strings.Replace(result, "&#34;", "\"", -1)), 0644)
 	if err != nil {
-		log.Printf("cannot write ztp script file: %v", err)
+		go CustomLog("GenerateXRZtpScript (write "+device.Serial+".sh into disk): "+err.Error(), ErrorSeverity)
 	}
 }
 
