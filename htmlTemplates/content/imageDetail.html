@@ -21,14 +21,14 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <div class="form-group__text">
-                                <input id="name" ng-model="currentImage.name" ng-enabled="false">
+                                <input id="name" ng-disabled="imagesLoading" ng-model="currentImage.name">
                                 <label for="name">Name</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-group__text select ">
                                 <select id="selDeviceType" name="selDeviceType" ng-options="item.name for item in deviceTypes"
-                                    ng-model="currentImage.deviceType">
+                                    ng-model="currentImage.deviceType" ng-disabled="imagesLoading">
                                 </select>
                                 <label for="selDeviceType">Device Type
                                 </label>
@@ -49,7 +49,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <input type="file" name="file" onchange="angular.element(this).scope().saveImageFile(this.files)" />
+                                <input ng-disabled="imagesLoading" type="file" name="file" onchange="angular.element(this).scope().saveImageFile(this.files)" />
                             </div>
                         </div>
                     </div>
@@ -62,7 +62,24 @@
         <div class="section">
             <div class="col-md-12">
                 <br />
-                <button class="btn btn--primary" style="float:right" ng-click="submitImage()">Save</button>
+                <button class="btn btn--primary" style="float:right" ng-disabled="imagesLoading" ng-click="submitImage()">Save</button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container" ng-if="imagesLoading">
+        <div class="section">
+            <div class="panel panel--loose panel--bordered">
+                <div class="col-md-12" style="text-align:center">
+                    <p>Uploading image to the server. Since these are ussually large files, it will take
+                        some time. Do not refresh or exit this page</p>
+                    <div class="loading-dots loading-dots--info">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

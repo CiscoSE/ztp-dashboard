@@ -45,7 +45,7 @@ function configure_crypto() {
 configure_crypto
 
 
-config_file="${ZTP_DIR}/configs/ztp.config"
+config_file="${ZTP_DIR}/ztp.config"
 
 ztp_console_log "CONFIG: Getting XR config from ${config_url}/..."
 

@@ -377,7 +377,8 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             $scope.error = "Please complete all fields";
             return;
         }
-
+        $scope.imagesLoading = true;
+        
         var fd = new FormData();
         //Add the selected file
         fd.append("file", $scope.imageFile);
