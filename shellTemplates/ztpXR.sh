@@ -71,3 +71,6 @@ xr_apply_config "${config_file}"
 ztp_console_log "CONFIG: XR configuration loaded from ZTP"
 
 ztp_console_log "INFO: Zero Touch Provisioning completed"
+
+# Notify that device is read
+curl -X PUT {{.ServerURL}}/api/devices/provisioned -d '{"serial":"AABBCCDD00"}'
