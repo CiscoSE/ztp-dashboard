@@ -22,7 +22,6 @@ type DhcpController struct {
 	Dhcp6XRHostsTemplate string
 	Dhcp6NXHostsTemplate string
 	interfacesCtl        interfaceController
-	scriptCtl            ScriptController
 }
 
 type DhcpConfig struct {
@@ -76,15 +75,15 @@ func (d DhcpController) GenerateConfigFiles() {
 		go CustomLog("GenerateConfigFiles (IPv6 address empty): "+err.Error(), ErrorSeverity)
 	}
 
-	err = d.scriptCtl.RemoveAllScripts()
+	err = scriptCtl.RemoveAllScripts()
 	if err != nil {
 		go CustomLog("GenerateConfigFiles (clean script directory): "+err.Error(), ErrorSeverity)
 	}
 	for _, item := range devices {
 		if item.DeviceType.Name == "iOS-XR" {
-			d.scriptCtl.GenerateXRZtpScript(item, govalidator.IsIPv6(item.Fixedip))
+			scriptCtl.GenerateXRZtpScript(item, govalidator.IsIPv6(item.Fixedip))
 		} else if item.DeviceType.Name == "NX-OS" {
-			d.scriptCtl.GenerateNXPoapScript(item, govalidator.IsIPv6(item.Fixedip))
+			scriptCtl.GenerateNXPoapScript(item, govalidator.IsIPv6(item.Fixedip))
 		}
 		var hostTemplate string
 		dhcpHost := &DhcpHostConfig{}

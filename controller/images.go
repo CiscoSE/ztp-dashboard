@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/CiscoSE/ztp-dashboard/model"
 	"github.com/globalsign/mgo/bson"
@@ -24,6 +25,44 @@ func (i imageController) registerRoutes(r *mux.Router) {
 	r.HandleFunc("/ng/images", i.handleImages)
 	r.HandleFunc("/ng/images/detail", i.handleImagesDetail)
 	r.HandleFunc("/api/images", i.handleAPIImages)
+	r.HandleFunc("/images/{imageName}", i.handleImageFiles)
+}
+
+// handleImageFiles is responsable for serving images to devices and also to update the state of the device
+func (i imageController) handleImageFiles(w http.ResponseWriter, r *http.Request) {
+	remoteIP := strings.Split(r.RemoteAddr, ":")[0]
+
+	var device model.Device
+	// Open database
+	session, err := i.db.OpenSession()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		go CustomLog("handleImageFiles (open database): "+err.Error(), ErrorSeverity)
+		return
+	}
+	defer session.Close()
+	dbCollection := session.DB("ztpDashboard").C("device")
+
+	// If device not found log the error and continue. Otherwhise update database
+	err = dbCollection.Find(bson.M{"fixedip": remoteIP}).One(&device)
+	if err != nil {
+		go CustomLog("handleImageFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
+	} else {
+		go CustomLog("handleImageFiles: Updating device "+device.Serial+" status to 'Installing image'", DebugSeverity)
+		device.Status = "Installing image"
+		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+	}
+
+	requestVars := mux.Vars(r)
+	content, err := ioutil.ReadFile(basePath + "/public/images/" + requestVars["imageName"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		CustomLog("handleImageFiles (reading image file): "+err.Error(), ErrorSeverity)
+		return
+	}
+	w.Write(content)
 }
 
 // handleConfig will be executed when a request to /ng/images is done

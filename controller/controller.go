@@ -62,9 +62,6 @@ func Startup(templates map[string]*template.Template, r *mux.Router) {
 
 	// Public assets and configs
 	r.PathPrefix("/assets/").Handler(http.FileServer(http.Dir(basePath + "/public")))
-	r.PathPrefix("/scripts/").Handler(http.FileServer(http.Dir(basePath + "/public")))
-	r.PathPrefix("/configs/").Handler(http.FileServer(http.Dir(basePath + "/public")))
-	r.PathPrefix("/images/").Handler(http.FileServer(http.Dir(basePath + "/public")))
 
 	// Handle DHCP Config files
 	dhcpController.DhcpTemplate = basePath + "/dhcpConfTemplates/dhcpd.conf"
@@ -75,8 +72,9 @@ func Startup(templates map[string]*template.Template, r *mux.Router) {
 	dhcpController.Dhcp6NXHostsTemplate = basePath + "/dhcpConfTemplates/dhcp6NXHost.conf"
 
 	// Handle Day 0 script files
-	dhcpController.scriptCtl.xrShellTemplate = basePath + "/shellTemplates/ztpXR.sh"
-	dhcpController.scriptCtl.nxPythonTemplate = basePath + "/pythonTemplates/poapNX.py"
+	scriptCtl.xrShellTemplate = basePath + "/shellTemplates/ztpXR.sh"
+	scriptCtl.nxPythonTemplate = basePath + "/pythonTemplates/poapNX.py"
+	scriptCtl.registerRoutes(r)
 
 	// Integration
 	// Webex teams

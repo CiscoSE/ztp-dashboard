@@ -301,6 +301,7 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             })
         }
         else {
+            $scope.currentDevice.status = "Configured"
             $http
             .post('/api/devices', $scope.currentDevice)
             .then(function (response, status, headers, config) {
@@ -378,7 +379,7 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             return;
         }
         $scope.imagesLoading = true;
-        
+
         var fd = new FormData();
         //Add the selected file
         fd.append("file", $scope.imageFile);

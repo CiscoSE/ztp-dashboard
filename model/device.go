@@ -8,6 +8,7 @@ type Device struct {
 	Image      Image      `json:"image"`
 	Config     Config     `json:"config"`
 	DeviceType DeviceType `json:"deviceType"`
+	Status     string     `json:"status"`
 }
 
 // DeviceType identifies if the device is NX or XR type

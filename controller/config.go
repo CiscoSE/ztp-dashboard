@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/CiscoSE/ztp-dashboard/model"
 	"github.com/globalsign/mgo/bson"
@@ -24,6 +25,44 @@ func (c configController) registerRoutes(r *mux.Router) {
 	r.HandleFunc("/ng/configs", c.handleConfigs)
 	r.HandleFunc("/api/configs", c.handleAPIConfigs)
 	r.HandleFunc("/ng/configs/detail", c.handleConfigDetail)
+	r.HandleFunc("/configs/{configName}", c.handleConfigFiles)
+}
+
+// handleConfigFiles is responsable for serving config to devices and also to update the state of it
+func (c configController) handleConfigFiles(w http.ResponseWriter, r *http.Request) {
+	remoteIP := strings.Split(r.RemoteAddr, ":")[0]
+
+	var device model.Device
+	// Open database
+	session, err := c.db.OpenSession()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		go CustomLog("handleConfigFiles (open database): "+err.Error(), ErrorSeverity)
+		return
+	}
+	defer session.Close()
+	dbCollection := session.DB("ztpDashboard").C("device")
+
+	// If device not found log the error and continue. Otherwhise update database
+	err = dbCollection.Find(bson.M{"fixedip": remoteIP}).One(&device)
+	if err != nil {
+		go CustomLog("handleConfigFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
+	} else {
+		go CustomLog("handleConfigFiles: Updating device "+device.Serial+" status to 'Running day 0 config'", DebugSeverity)
+		device.Status = "Running day 0 config"
+		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+	}
+
+	requestVars := mux.Vars(r)
+	content, err := ioutil.ReadFile(basePath + "/public/configs/" + requestVars["configName"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		CustomLog("handleConfigFiles (reading image file): "+err.Error(), ErrorSeverity)
+		return
+	}
+	w.Write(content)
 }
 
 // handleConfig will be executed when a request to /ng/configs is done

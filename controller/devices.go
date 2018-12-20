@@ -22,6 +22,55 @@ func (n deviceController) registerRoutes(r *mux.Router) {
 	r.HandleFunc("/ng/devices/detail", n.handleDevicesDetail)
 	r.HandleFunc("/api/devices", n.handleAPIDevices)
 	r.HandleFunc("/api/devices/types", n.handleAPIDeviceTypes)
+	r.HandleFunc("/api/devices/provisioned", n.handleAPIDevicesProvisioned)
+}
+
+func (n deviceController) handleAPIDevicesProvisioned(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPut:
+
+		// Decode the request body into an Device model.
+		dec := json.NewDecoder(r.Body)
+		device := &model.Device{}
+		err := dec.Decode(device)
+
+		if err != nil {
+			log.Print(err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("Couldn't decode json: " + err.Error() + "\n"))
+			go CustomLog("handleAPIDevicesProvisioned (decode json): "+err.Error(), ErrorSeverity)
+			return
+		}
+
+		var deviceDB model.Device
+		// Open database
+		session, err := n.db.OpenSession()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
+			go CustomLog("handleAPIDevicesProvisioned (open database): "+err.Error(), ErrorSeverity)
+			return
+		}
+		defer session.Close()
+		dbCollection := session.DB("ztpDashboard").C("device")
+
+		// If device not found log the error and continue. Otherwhise update database
+		err = dbCollection.Find(bson.M{"serial": device.Serial}).One(&deviceDB)
+		if err != nil {
+			go CustomLog("handleAPIDevicesProvisioned (Find device): "+device.Serial+" "+err.Error(), DebugSeverity)
+		} else {
+			go CustomLog("handleAPIDevicesProvisioned: Updating device "+device.Serial+" status to 'Running day 0 config'", DebugSeverity)
+			device.Status = "Provisioned"
+			dbCollection.Update(bson.M{"serial": device.Serial}, &deviceDB)
+		}
+
+		// Send notification
+		go WebexTeamsCtl.SendMessage("Device " + device.Serial + " provisioned successfully.")
+
+		// Return ok message
+		w.Write([]byte("ok"))
+		break
+	}
 }
 
 // checkDeviceTypes check if NX and XR device types are present in Database
