@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/CiscoSE/ztp-dashboard/model"
 	"github.com/globalsign/mgo/bson"
@@ -28,21 +29,8 @@ func (n deviceController) registerRoutes(r *mux.Router) {
 func (n deviceController) handleAPIDevicesProvisioned(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPut:
-
-		// Decode the request body into an Device model.
-		dec := json.NewDecoder(r.Body)
-		device := &model.Device{}
-		err := dec.Decode(device)
-
-		if err != nil {
-			log.Print(err)
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Couldn't decode json: " + err.Error() + "\n"))
-			go CustomLog("handleAPIDevicesProvisioned (decode json): "+err.Error(), ErrorSeverity)
-			return
-		}
-
-		var deviceDB model.Device
+		remoteIP := strings.Split(r.RemoteAddr, ":")[0]
+		var device model.Device
 		// Open database
 		session, err := n.db.OpenSession()
 		if err != nil {
@@ -55,13 +43,13 @@ func (n deviceController) handleAPIDevicesProvisioned(w http.ResponseWriter, r *
 		dbCollection := session.DB("ztpDashboard").C("device")
 
 		// If device not found log the error and continue. Otherwhise update database
-		err = dbCollection.Find(bson.M{"serial": device.Serial}).One(&deviceDB)
+		err = dbCollection.Find(bson.M{"fixedip": remoteIP}).One(&device)
 		if err != nil {
-			go CustomLog("handleAPIDevicesProvisioned (Find device): "+device.Serial+" "+err.Error(), DebugSeverity)
+			go CustomLog("handleAPIDevicesProvisioned (Find device): "+remoteIP+" "+err.Error(), DebugSeverity)
 		} else {
-			go CustomLog("handleAPIDevicesProvisioned: Updating device "+device.Serial+" status to 'Running day 0 config'", DebugSeverity)
+			go CustomLog("handleAPIDevicesProvisioned: Updating device "+device.Serial+" status to 'Provisioned'", DebugSeverity)
 			device.Status = "Provisioned"
-			dbCollection.Update(bson.M{"serial": device.Serial}, &deviceDB)
+			dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
 		}
 
 		// Send notification
