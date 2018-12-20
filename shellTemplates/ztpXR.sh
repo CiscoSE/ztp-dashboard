@@ -15,7 +15,7 @@ dns_servers="8.8.8.8 8.8.4.4"
 
 function dns_config() {
      local address
-     for address in ${dns_servers} do
+     for address in ${dns_servers}; do
           echo "nameserver ${address}" >> /etc/resolv.conf
      done
      echo "search cisco.com" >> /etc/resolv.conf
