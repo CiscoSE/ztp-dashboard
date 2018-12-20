@@ -6,14 +6,6 @@ source /pkg/etc/ztp.config
 
 umask 022
 
-# Logs 
-
-function ztp_console_log(){
-    local DATE="`date '+%b %d %H:%M:%S.%3N'`"
-    ztp_console_log "${DATE}: Zero-Touch-Provisioning: ${1}"
-	ztp_syslog_info "Zero-Touch-Provisioning: ${1}"
-}
-
 ztp_console_log "INFO: Zero Touch Provisioning started"
 
 # DNS 
@@ -45,7 +37,7 @@ function configure_crypto() {
 configure_crypto
 
 
-config_file="${ZTP_DIR}/ztp.config"
+config_file="${ZTP_DIR}/customer/ztp.config"
 
 ztp_console_log "CONFIG: Getting XR config from ${config_url}/..."
 
