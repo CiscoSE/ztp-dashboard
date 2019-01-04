@@ -85,7 +85,6 @@ func Startup(templates map[string]*template.Template, r *mux.Router) {
 	CreateDirIfNotExist(basePath + "/public/images")
 	CreateDirIfNotExist(basePath + "/public/scripts")
 	go dhcpController.GenerateConfigFiles()
-
 }
 
 // CreateDirIfNotExist creates directories if not present

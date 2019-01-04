@@ -32,6 +32,15 @@ func (i imageController) registerRoutes(r *mux.Router) {
 func (i imageController) handleImageFiles(w http.ResponseWriter, r *http.Request) {
 	remoteIP := strings.Split(r.RemoteAddr, ":")[0]
 
+	requestVars := mux.Vars(r)
+	content, err := ioutil.ReadFile(basePath + "/public/images/" + requestVars["imageName"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		CustomLog("handleImageFiles (reading image file): "+err.Error(), ErrorSeverity)
+		return
+	}
+
 	var device model.Device
 	// Open database
 	session, err := i.db.OpenSession()
@@ -49,19 +58,13 @@ func (i imageController) handleImageFiles(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		go CustomLog("handleImageFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
 	} else {
-		go CustomLog("handleImageFiles: Updating device "+device.Serial+" status to 'Installing image'", DebugSeverity)
+		go CustomLog("handleImageFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Installing image'", DebugSeverity)
 		device.Status = "Installing image"
 		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+		// Notify status change
+		go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is installing image " + requestVars["imageName"])
 	}
 
-	requestVars := mux.Vars(r)
-	content, err := ioutil.ReadFile(basePath + "/public/images/" + requestVars["imageName"])
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		CustomLog("handleImageFiles (reading image file): "+err.Error(), ErrorSeverity)
-		return
-	}
 	w.Write(content)
 }
 

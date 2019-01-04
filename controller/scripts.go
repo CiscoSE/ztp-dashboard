@@ -42,6 +42,15 @@ func (s ScriptController) registerRoutes(r *mux.Router) {
 func (s ScriptController) handleScriptFiles(w http.ResponseWriter, r *http.Request) {
 	remoteIP := strings.Split(r.RemoteAddr, ":")[0]
 
+	requestVars := mux.Vars(r)
+	content, err := ioutil.ReadFile(basePath + "/public/scripts/" + requestVars["scriptName"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		CustomLog("handleImageFiles (reading image file): "+err.Error(), ErrorSeverity)
+		return
+	}
+
 	var device model.Device
 	// Open database
 	session, err := s.db.OpenSession()
@@ -59,18 +68,11 @@ func (s ScriptController) handleScriptFiles(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		go CustomLog("handleScriptFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
 	} else {
-		go CustomLog("handleScriptFiles: Updating device "+device.Serial+" status to 'Running init script'", DebugSeverity)
+		go CustomLog("handleScriptFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Running init script'", DebugSeverity)
 		device.Status = "Running init script"
 		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
-	}
-
-	requestVars := mux.Vars(r)
-	content, err := ioutil.ReadFile(basePath + "/public/scripts/" + requestVars["scriptName"])
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		CustomLog("handleImageFiles (reading image file): "+err.Error(), ErrorSeverity)
-		return
+		// Notify status change
+		go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is executing script " + requestVars["scriptName"])
 	}
 	w.Write(content)
 }

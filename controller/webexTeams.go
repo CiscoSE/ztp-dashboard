@@ -2,7 +2,6 @@ package controller
 
 import (
 	"bytes"
-	"crypto/tls"
 	"html/template"
 	"net/http"
 	"os"
@@ -85,6 +84,7 @@ func (w WebexTeamsController) SendMessage(message string) {
 		return
 	}
 	resp, err := w.makeCall("POST", "/v1/messages", payload.Bytes())
+
 	if err != nil {
 		go CustomLog("SendMessage (make call): "+err.Error(), ErrorSeverity)
 		return
@@ -111,16 +111,12 @@ func (w WebexTeamsController) makeCall(method string, url string, payload []byte
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("authorization", "Bearer "+botToken)
 
-	// Create transport that allows https connections with self signed  certificates
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
 	// Set up client
-	client := &http.Client{Transport: tr}
+	client := &http.Client{}
 
 	// Do request
 	resp, err := client.Do(req)
+	go CustomLog("Webex request done", DebugSeverity)
 
 	// Return the results
 	return resp, err

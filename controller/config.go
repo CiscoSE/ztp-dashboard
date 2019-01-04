@@ -32,6 +32,15 @@ func (c configController) registerRoutes(r *mux.Router) {
 func (c configController) handleConfigFiles(w http.ResponseWriter, r *http.Request) {
 	remoteIP := strings.Split(r.RemoteAddr, ":")[0]
 
+	requestVars := mux.Vars(r)
+	content, err := ioutil.ReadFile(basePath + "/public/configs/" + requestVars["configName"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		CustomLog("handleConfigFiles (reading image file): "+err.Error(), ErrorSeverity)
+		return
+	}
+
 	var device model.Device
 	// Open database
 	session, err := c.db.OpenSession()
@@ -49,19 +58,12 @@ func (c configController) handleConfigFiles(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		go CustomLog("handleConfigFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
 	} else {
-		go CustomLog("handleConfigFiles: Updating device "+device.Serial+" status to 'Running day 0 config'", DebugSeverity)
+		go CustomLog("handleConfigFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Running day 0 config'", DebugSeverity)
 		device.Status = "Running day 0 config"
 		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+		go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is running day 0 config " + requestVars["configName"])
 	}
 
-	requestVars := mux.Vars(r)
-	content, err := ioutil.ReadFile(basePath + "/public/configs/" + requestVars["configName"])
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		CustomLog("handleConfigFiles (reading image file): "+err.Error(), ErrorSeverity)
-		return
-	}
 	w.Write(content)
 }
 
