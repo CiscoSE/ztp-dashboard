@@ -84,7 +84,14 @@ func (w WebexTeamsController) SendMessage(message string) {
 		go CustomLog("SendMessage (execute template): "+err.Error(), ErrorSeverity)
 		return
 	}
-	w.makeCall("POST", "/v1/messages", payload.Bytes())
+	resp, err := w.makeCall("POST", "/v1/messages", payload.Bytes())
+	if err != nil {
+		go CustomLog("SendMessage (make call): "+err.Error(), ErrorSeverity)
+		return
+	}
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		go CustomLog("SendMessage (make call): webex teams returned status code "+string(resp.StatusCode), ErrorSeverity)
+	}
 }
 
 // Single point to make calls to webex teams
@@ -102,7 +109,6 @@ func (w WebexTeamsController) makeCall(method string, url string, payload []byte
 
 	// Add headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
 	req.Header.Set("authorization", "Bearer "+botToken)
 
 	// Create transport that allows https connections with self signed  certificates
