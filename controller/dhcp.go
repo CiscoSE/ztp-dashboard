@@ -131,7 +131,7 @@ func (d DhcpController) GenerateConfigFiles() {
 				dhcpHost = &DhcpHostConfig{
 					HostName:     item.Hostname,
 					ClientID:     clientID,
-					ScriptFile:   "/tftboot/public/scripts/" + item.Serial + ".py",
+					ScriptFile:   "public/scripts/" + item.Serial + ".py",
 					FixedAddress: item.Fixedip,
 				}
 			}
