@@ -272,6 +272,8 @@ appModule.controller('AppController', function ($scope, $location, $http) {
             })
     };
     $scope.getDevices();
+    // Refresh devices each 10 seconds. TODO: This should be done with websockets 
+    setInterval(function(){ $scope.getDevices(); }, 10000);
 
     $scope.submitDevice = function () {
         $scope.clearError();

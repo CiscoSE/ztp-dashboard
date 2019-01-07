@@ -182,11 +182,10 @@ func (d DhcpController) GenerateConfigFiles() {
 
 	go CustomLog("Restarting DHCPv4 service using: "+os.Getenv("DHCP_SERVICE_RESTART_CMD"), DebugSeverity)
 
-	out, err := exec.Command("bash", "-c", os.Getenv("DHCP_SERVICE_RESTART_CMD")).Output()
+	_, err = exec.Command("bash", "-c", os.Getenv("DHCP_SERVICE_RESTART_CMD")).Output()
 	if err != nil {
 		go CustomLog("GenerateConfigFiles (restart DHCP service): "+err.Error(), ErrorSeverity)
 	}
-	go CustomLog("Result: "+string(out), DebugSeverity)
 
 	// DHCPv6
 	dhcp6Config := &DhcpConfig{
@@ -214,9 +213,9 @@ func (d DhcpController) GenerateConfigFiles() {
 	}
 	go CustomLog("Restarting DHCPv6 service using:"+os.Getenv("DHCP6_SERVICE_RESTART_CMD"), DebugSeverity)
 
-	out, err = exec.Command("bash", "-c", os.Getenv("DHCP6_SERVICE_RESTART_CMD")).Output()
+	_, err = exec.Command("bash", "-c", os.Getenv("DHCP6_SERVICE_RESTART_CMD")).Output()
 	if err != nil {
 		go CustomLog("GenerateConfigFiles (restart DHCP6 service): "+err.Error(), ErrorSeverity)
 	}
-	go CustomLog("Result: "+string(out), DebugSeverity)
+
 }
