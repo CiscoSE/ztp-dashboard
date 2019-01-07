@@ -54,7 +54,10 @@ func (n deviceController) handleAPIDevicesProvisioned(w http.ResponseWriter, r *
 				dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
 
 				// Send notification
-				go WebexTeamsCtl.SendMessage("Device " + device.Serial + " provisioned successfully.")
+				go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") provisioned successfully.")
+
+				// Start automated tests
+				go testController.TestDevice(device)
 			}
 		}
 

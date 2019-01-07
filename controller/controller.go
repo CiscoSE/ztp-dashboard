@@ -24,6 +24,7 @@ var (
 	imagesCtl       imageController
 	WebexTeamsCtl   WebexTeamsController
 	SituationMgrCtl SituationMgrController
+	testController  TestController
 )
 
 // Startup associates controllers with templates and routes
