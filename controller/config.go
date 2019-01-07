@@ -58,12 +58,14 @@ func (c configController) handleConfigFiles(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		go CustomLog("handleConfigFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
 	} else {
-		go CustomLog("handleConfigFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Running day 0 config'", DebugSeverity)
-		device.Status = "Running day 0 config"
-		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
-		go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is running day 0 config " + requestVars["configName"])
+		// Only do update if device status is different from desired
+		if device.Status != "Running day 0 config" {
+			go CustomLog("handleConfigFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Running day 0 config'", DebugSeverity)
+			device.Status = "Running day 0 config"
+			dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+			go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is running day 0 config " + requestVars["configName"])
+		}
 	}
-
 	w.Write(content)
 }
 

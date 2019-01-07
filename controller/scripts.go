@@ -68,11 +68,14 @@ func (s ScriptController) handleScriptFiles(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		go CustomLog("handleScriptFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
 	} else {
-		go CustomLog("handleScriptFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Running init script'", DebugSeverity)
-		device.Status = "Running init script"
-		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
-		// Notify status change
-		go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is executing script " + requestVars["scriptName"])
+		// Only do update if device status is different from desired
+		if device.Status != "Running init script" {
+			go CustomLog("handleScriptFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Running init script'", DebugSeverity)
+			device.Status = "Running init script"
+			dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+			// Notify status change
+			go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is executing script " + requestVars["scriptName"])
+		}
 	}
 	w.Write(content)
 }

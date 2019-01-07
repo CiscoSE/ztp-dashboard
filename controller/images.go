@@ -58,13 +58,15 @@ func (i imageController) handleImageFiles(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		go CustomLog("handleImageFiles (Find request device): "+remoteIP+" "+err.Error(), DebugSeverity)
 	} else {
-		go CustomLog("handleImageFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Installing image'", DebugSeverity)
-		device.Status = "Installing image"
-		dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
-		// Notify status change
-		go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is installing image " + requestVars["imageName"])
+		// Only do update if device status is different from desired
+		if device.Status != "Installing image" {
+			go CustomLog("handleImageFiles: Updating device "+device.Hostname+" (serial "+device.Serial+") status to 'Installing image'", DebugSeverity)
+			device.Status = "Installing image"
+			dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+			// Notify status change
+			go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is installing image " + requestVars["imageName"])
+		}
 	}
-
 	w.Write(content)
 }
 
