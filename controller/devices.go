@@ -52,10 +52,11 @@ func (n deviceController) handleAPIDevicesProvisioned(w http.ResponseWriter, r *
 				go CustomLog("handleAPIDevicesProvisioned: Updating device "+device.Serial+" status to 'Provisioned'", DebugSeverity)
 				device.Status = "Provisioned"
 				dbCollection.Update(bson.M{"fixedip": remoteIP}, &device)
+
+				// Send notification
+				go WebexTeamsCtl.SendMessage("Device " + device.Serial + " provisioned successfully.")
 			}
 		}
-		// Send notification
-		go WebexTeamsCtl.SendMessage("Device " + device.Serial + " provisioned successfully.")
 
 		// Return ok message
 		w.Write([]byte("ok"))
