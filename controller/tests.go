@@ -43,7 +43,7 @@ func (t TestController) TestDevice(device model.Device) {
 			// Send notification
 			go WebexTeamsCtl.SendMessage("Device " + device.Hostname + " (serial " + device.Serial + ") is reachable. Test succeded")
 		}
-		//deviceReplied = true
+		deviceReplied = true
 	}
 	p.OnIdle = func() {
 		if !deviceReplied {
