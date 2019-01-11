@@ -6,10 +6,10 @@ Dashboard to manage zero touch provisioning configurations and automated upgrade
 ## Business/Technical Challenge
 
 The on-boarding of devices into the network can be challenging. It can require manual configuration, and that increases the risk of human error.
-Upgrading to newer software images can also be quite complex, and testing that everything work as expected is rarely automated.
+Upgrading to newer software images can also be quite complex, and testing that everything works as expected is rarely automated.
 
-Zero Touch Provisioning (ZTP) for XR and Power On Auto-Provisioning (POAP) for Nexus, can make this easier. Since these processes automate the 
-on-boarding of devices, you are able to do the initial software install and the day-0 configuration without human intervention.
+Tool like Zero Touch Provisioning (ZTP) for XR and Power On Auto-Provisioning (POAP) for Nexus makes this process easier. By automating the 
+on-boarding of devices with these tools, we are able to do the initial software installation and the day-0 configuration without human intervention.
 
 However, configuring ZTP and POAP in your environment requires knowledge around DHCP, HTTP and other tools. Also, if you want to do upgrades for 
 devices already present in the network, you still need to manually save the configuration of the device and do the reboot with the correct options.
@@ -18,7 +18,7 @@ Finally, ZTP and POAP do not include automated tests.
 
 ## Proposed Solution
 
-In order to enable customers to fully take advantage of ZTP and POAP, an application can be done where the following tasks are automated:
+In order to enable customers to fully take full advantage of ZTP and POAP, we propose the following application where the these tasks are automated:
 
 * Setup DHCP server configuration, including options and client identifiers
 * Setup HTTP configuration, where XR and NX images will be stored along with day 0 scripts
@@ -54,7 +54,7 @@ At this moment, this tool supports Nexus and XR devices only. Demo at https://yo
 
 ## Installation
 
-
+The installation script can be found installation directory and the bash script setup.sh can be run to setup the system.  
 
 ## Documentation
 
