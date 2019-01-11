@@ -50,12 +50,17 @@ The solution will leverage the following Cisco technologies
 
 ## Usage
 
+At this moment, this tool supports Nexus and XR devices only. Demo at https://youtu.be/No7S-gKHrDU
 
 ## Installation
 
 
+
 ## Documentation
 
+Documentation around Nexus Power On Auto-Provisioning  can be found at https://developer.cisco.com/docs/nx-os/#!poap
+
+Documentation for XR Zero Touch Provisioning can be found at https://xrdocs.io/device-lifecycle/tutorials/2016-08-26-working-with-ztp/#how-ztp-works 
 
 ## License
 
