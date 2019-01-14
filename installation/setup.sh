@@ -1,8 +1,40 @@
 #!/bin/bash
 
+# Create the following .env file with the correct variables for your setup
+#--------------------------------------------------------------------------
+# Go related variables, shouldn't need to be changed
+#export GOPATH=$PWD
+#export GOBIN=$PWD/bin
+#export GOROOT=/usr/local/go
+#export PATH=$PATH:$GOPATH/bin
+
+# DHCP v4 information
+#export DHCP_NAMESERVERS=
+#export DHCP_SUBNET=
+#export DHCP_SUBNET_NETMASK=
+#export DHCP_CONFIG_PATH=/etc/dhcp/dhcpd.conf
+#export DHCP_SERVICE_RESTART_CMD="systemctl restart isc-dhcp-server"
+
+# DHCP v6 information
+#export DHCP6_NAMESERVERS=
+#export DHCP6_SUBNET=
+#export DHCP6_SUBNET_NETMASK=
+#export DHCP6_CONFIG_PATH=/etc/dhcp/dhcpd6.conf
+#export DHCP6_SERVICE_RESTART_CMD="systemctl restart isc-dhcp-server6"
+
+# Mongo URI to be used by the tool
+#export DB_URI=
+# Port to be listening for incomming web requests
+#export APP_WEB_PORT=8080
+# Token to be used when sending notifications
+#export WEBEX_BOT_TOKEN=
+# Enable for extra log information
+#export DEBUG=on
+#--------------------------------------------------------------------------
+
+
 #install golang
 sudo apt update
-
 wget https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz
 sudo tar -xvf go1.11.4.linux-amd64.tar.gz
 sudo mv go /usr/local
@@ -10,10 +42,10 @@ sudo mv go /usr/local
 #setup go files
 mkdir $HOME/asic_q2
 cd $HOME/asic_q2
-mkdir src 
+mkdir src
 mkdir bin
 mkdir pkg
-. .envs
+. .env
 go get github.com/CiscoSE/ztp-dashboard
 go install github.com/CiscoSE/ztp-dashboard
 
@@ -22,7 +54,7 @@ sudo apt install isc-dhcp-server
 
 #start service
 sudo systemctl start isc-dhcp-server.service
-
+sudo systemctl start isc-dhcp-server6.service
 
 #install tftp server
 
@@ -51,8 +83,29 @@ echo "}" >> $tftp_file
 sudo systemctl start xinetd
 
 #run ztp-dashboard as a daemon
+#create a system file for ztp-dashboard
+system_file = "/etc/systemd/system/ztp-dashboard.service"
+
+echo "[Unit]" >> $system_file
+echo "Description=ZTP-dashboard service" >> $system_file
+echo "[Service]" >> $system_file
+echo "ExecStart=/home/ubuntu/asic_q2/bin/start-ztp.sh" >> $system_file
+echo "[Install]" >> $system_file
+echo "WantedBy=multi-user.target" >> $system_file
+
+
+#create a startup file for ztp-dashboard
 cd $HOME/asic_q2/bin
-sudo daemonize -p /var/run/ztp-dashboard.pid -l /var/lock/subsys/ztp-dashboard -u nobody $HOME/asic_q2/bin/ztp-dashboard
+startup_file="start-ztp.sh"
+
+echo "#!/bin/bash" >> $startup_file
+echo "cd /home/ubuntu/asic_q2" >> $startup_file
+echo ". .env" >> $startup_file
+echo "cd /home/ubuntu/asic_q2/bin/" >> $startup_file
+echo "./ztp-dashboard" >> $startup_file
+
+sudo chmod 755 $startup_file
+sudo systemctl start ztp-dashboard
 
 #link created so config and images can be accessed via tftp
 ln -sf $GOPATH/src/github.com/CiscoSE/ztp-dashboard/public/ /tftpboot/
