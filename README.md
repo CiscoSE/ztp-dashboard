@@ -57,11 +57,45 @@ At this moment, this tool supports Nexus and XR devices only. Demo at https://yo
 
 ## Installation
 
-The installation script can be found installation directory and the bash script setup.sh can be run to setup the system.  
+The bash script setup.sh under the installation directory can be run to setup the application.  
+The app assumes that there is a Mongo DB reachable, which is configured via env variables.
+
+Also, you need to have an .env file with the following variables inside your $GOPATH directory:
+
+```bash
+# Go related variables, shouldn't need to be changed
+export GOPATH=$PWD
+export GOBIN=$PWD/bin
+export GOROOT=/usr/local/go
+export PATH=$PATH:$GOPATH/bin
+
+# DHCP v4 information
+export DHCP_NAMESERVERS=
+export DHCP_SUBNET=
+export DHCP_SUBNET_NETMASK=
+export DHCP_CONFIG_PATH=/etc/dhcp/dhcpd.conf
+export DHCP_SERVICE_RESTART_CMD="systemctl restart isc-dhcp-server"
+
+# DHCP v6 information
+export DHCP6_NAMESERVERS=
+export DHCP6_SUBNET=
+export DHCP6_SUBNET_NETMASK=
+export DHCP6_CONFIG_PATH=/etc/dhcp/dhcpd6.conf
+export DHCP6_SERVICE_RESTART_CMD="systemctl restart isc-dhcp-server6"
+
+# Mongo URI to be used by the tool
+export DB_URI=
+# Port to be listening for incomming web requests
+export APP_WEB_PORT=8080
+# Token to be used when sending notifications
+export WEBEX_BOT_TOKEN=
+# Enable for extra log information
+export DEBUG=on
+```
 
 ## Documentation
 
-Documentation around Nexus Power On Auto-Provisioning  can be found at https://developer.cisco.com/docs/nx-os/#!poap
+Documentation around Nexus Power On Auto-Provisioning can be found at https://developer.cisco.com/docs/nx-os/#!poap
 
 Documentation for XR Zero Touch Provisioning can be found at https://xrdocs.io/device-lifecycle/tutorials/2016-08-26-working-with-ztp/#how-ztp-works 
 
