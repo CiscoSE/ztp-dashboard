@@ -50,6 +50,7 @@ The solution will leverage the following Cisco technologies
 
 * Golang
 * isc-dhcp-server
+* Mongo DB
 
 ## Usage
 
