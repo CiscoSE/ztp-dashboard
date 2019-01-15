@@ -2,34 +2,30 @@
 
 # ZTP Dashboard
 
-Dashboard to manage zero touch provisioning configurations and automated upgrades for XR and NX devices
+Dashboard to manage zero touch provisioning configurations and automated upgrades for Cisco IOS XR and Nexus devices
 
 
 ## Business/Technical Challenge
 
-The on-boarding of devices into the network can be challenging. It can require manual configuration, and that increases the risk of human error.
-Upgrading to newer software images can also be quite complex, and testing that everything works as expected is rarely automated.
+The on-boarding of devices into the network can be challenging. It can require manual configuration, and that increases the risk of human error. Upgrading to newer software images can also be quite complex, and testing that everything works as expected is rarely automated.
 
-Tool like Zero Touch Provisioning (ZTP) for XR and Power On Auto-Provisioning (POAP) for Nexus makes this process easier. By automating the 
-on-boarding of devices with these tools, we are able to do the initial software installation and the day-0 configuration without human intervention.
+Tools like Zero Touch Provisioning (ZTP) for XR and Power On Auto-Provisioning (POAP) for Nexus makes this process easier. By automating the on-boarding of devices with these tools, we are able to do the initial software installation and the day-0 configuration without human intervention.
 
-However, configuring ZTP and POAP in your environment requires knowledge around DHCP, HTTP and other tools. Also, if you want to do upgrades for 
-devices already present in the network, you still need to manually save the configuration of the device and do the reboot with the correct options.
+However, configuring ZTP and POAP in your environment requires knowledge around DHCP, HTTP and other tools. Also, if you want to do upgrades for devices already present in the network, you still need to manually save the configuration of the device and do the reboot with the correct options.
 
 Finally, ZTP and POAP do not include automated tests.
 
 ## Proposed Solution
 
-In order to enable customers to fully take full advantage of ZTP and POAP, we propose the following application where the these tasks are automated:
+In order to enable customers to take full advantage of ZTP and POAP, we propose the following application where the these tasks are automated:
 
 * Setup DHCP server configuration, including options and client identifiers
-* Setup HTTP configuration, where XR and NX images will be stored along with day 0 scripts
+* Setup HTTP configuration, where XR and Nexus images will be stored along with day-0 scripts
 * Detection of the different phases for the ZTP and POAP processes 
 * Tests (ping or telemetry)
 * Notifications 
 
-The solution will help operators to configure HTTP, DHCP or TFTP from a single portal, without the need of extensive knowledge around how these technologies work. Since everything is managed from a single point, alerts with extensive descriptions 
-can be sent to monitoring tools when troubleshooting needs to be done.
+The solution will help operators to configure HTTP, DHCP or TFTP from a single portal, without the need of extensive knowledge around how these technologies work. Since everything is managed from a single point, alerts with extensive descriptions can be sent to monitoring tools when troubleshooting needs to be done.
 
 ### Cisco Products Technologies/ Services
 
@@ -58,7 +54,7 @@ At this moment, this tool supports Nexus and XR devices only. Demo at https://yo
 
 ## Installation
 
-The bash script setup.sh under the installation directory can be run to setup the application.  
+The bash script [setup.sh](./installation/setup.sh) under the installation directory can be run to setup the application.  
 The app assumes that there is a Mongo DB reachable, which is configured via env variables.
 
 Also, you need to have an .env file with the following variables inside your $GOPATH directory:
@@ -86,10 +82,13 @@ export DHCP6_SERVICE_RESTART_CMD="systemctl restart isc-dhcp-server6"
 
 # Mongo URI to be used by the tool
 export DB_URI=
-# Port to be listening for incomming web requests
+
+# Port to be listening for incoming web requests
 export APP_WEB_PORT=8080
+
 # Token to be used when sending notifications
 export WEBEX_BOT_TOKEN=
+
 # Enable for extra log information
 export DEBUG=on
 ```
@@ -102,7 +101,7 @@ Documentation for XR Zero Touch Provisioning can be found at https://xrdocs.io/d
 
 ## License
 
-Provided under Cisco Sample Code License, for details see [LICENSE](./LICENSE.md)
+Provided under Cisco Sample Code License, for details see [LICENSE](./LICENSE)
 
 ## Code of Conduct
 
