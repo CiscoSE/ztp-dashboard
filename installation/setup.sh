@@ -84,7 +84,7 @@ sudo systemctl start xinetd
 
 #run ztp-dashboard as a daemon
 #create a system file for ztp-dashboard
-system_file = "/etc/systemd/system/ztp-dashboard.service"
+system_file="/etc/systemd/system/ztp-dashboard.service"
 
 echo "[Unit]" >> $system_file
 echo "Description=ZTP-dashboard service" >> $system_file
