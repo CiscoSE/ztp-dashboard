@@ -57,12 +57,12 @@ At this moment, this tool supports Nexus and XR devices only. Demo at https://yo
 The bash script [setup.sh](./installation/setup.sh) under the installation directory can be run to setup the application.  
 The app assumes that there is a Mongo DB reachable, which is configured via env variables.
 
-Also, you need to have an .env file with the following variables inside your $GOPATH directory:
+Also, you need to have an .env file with the following variables inside the installation directory with the setup.sh file:
 
 ```bash
 # Go related variables, shouldn't need to be changed
-export GOPATH=$PWD
-export GOBIN=$PWD/bin
+export GOPATH=$HOME/asic_q2
+export GOBIN=$GOPATH/bin
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOPATH/bin
 
