@@ -3,8 +3,8 @@
 # Create the following .env file with the correct variables for your setup
 #--------------------------------------------------------------------------
 # Go related variables, shouldn't need to be changed
-#export GOPATH=$PWD
-#export GOBIN=$PWD/bin
+#export GOPATH=$HOME/asic_q2
+#export GOBIN=$GOPATH/bin
 #export GOROOT=/usr/local/go
 #export PATH=$PATH:$GOPATH/bin
 
@@ -38,14 +38,18 @@ sudo apt update
 wget https://dl.google.com/go/go1.11.4.linux-amd64.tar.gz
 sudo tar -xvf go1.11.4.linux-amd64.tar.gz
 sudo mv go /usr/local
+echo 'export GOROOT=/usr/local/go' | sudo tee -a /etc/profile
+echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
+source /etc/profile
 
 #setup go files
 mkdir $HOME/asic_q2
 cd $HOME/asic_q2
+cp .env $HOME/asic_q2
+. .env
 mkdir src
 mkdir bin
 mkdir pkg
-. .env
 go get github.com/CiscoSE/ztp-dashboard
 go install github.com/CiscoSE/ztp-dashboard
 
@@ -89,7 +93,7 @@ system_file="/etc/systemd/system/ztp-dashboard.service"
 echo "[Unit]" >> $system_file
 echo "Description=ZTP-dashboard service" >> $system_file
 echo "[Service]" >> $system_file
-echo "ExecStart=/home/ubuntu/asic_q2/bin/start-ztp.sh" >> $system_file
+echo "ExecStart=$HOME/asic_q2/bin/start-ztp.sh" >> $system_file
 echo "[Install]" >> $system_file
 echo "WantedBy=multi-user.target" >> $system_file
 
@@ -99,9 +103,9 @@ cd $HOME/asic_q2/bin
 startup_file="start-ztp.sh"
 
 echo "#!/bin/bash" >> $startup_file
-echo "cd /home/ubuntu/asic_q2" >> $startup_file
+echo "cd $HOME/asic_q2" >> $startup_file
 echo ". .env" >> $startup_file
-echo "cd /home/ubuntu/asic_q2/bin/" >> $startup_file
+echo "cd $HOME/asic_q2/bin/" >> $startup_file
 echo "./ztp-dashboard" >> $startup_file
 
 sudo chmod 755 $startup_file
