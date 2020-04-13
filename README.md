@@ -61,7 +61,7 @@ Also, you'll need to modify the env file inside the installation directory with 
 
 ```bash
 # Go related variables, shouldn't need to be changed
-export GOPATH=$HOME/asic_q2
+export GOPATH=/opt/ztp-go
 export GOBIN=$GOPATH/bin
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOPATH/bin
@@ -80,8 +80,8 @@ export DHCP6_SUBNET_NETMASK=
 export DHCP6_CONFIG_PATH=/etc/dhcp/dhcpd6.conf
 export DHCP6_SERVICE_RESTART_CMD="systemctl restart isc-dhcp-server6"
 
-# Mongo URI to be used by the tool
-export DB_URI=
+# Mongo URI to be used by the tool. 127.0.0.1 assumes mongodb is localhost
+export DB_URI=127.0.0.1
 
 # Port to be listening for incoming web requests
 export APP_WEB_PORT=8080
