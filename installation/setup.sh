@@ -44,8 +44,9 @@ source /etc/profile
 
 #setup go files
 mkdir $HOME/asic_q2
+cp env $HOME/asic_q2/.env
 cd $HOME/asic_q2
-cp .env $HOME/asic_q2
+sudo chmod 755 .env
 . .env
 mkdir src
 mkdir bin
@@ -54,7 +55,7 @@ go get github.com/CiscoSE/ztp-dashboard
 go install github.com/CiscoSE/ztp-dashboard
 
 #install isc-dhcp-server
-sudo apt install isc-dhcp-server
+sudo apt install -y isc-dhcp-server
 
 #start service
 sudo systemctl start isc-dhcp-server.service
@@ -62,7 +63,7 @@ sudo systemctl start isc-dhcp-server6.service
 
 #install tftp server
 
-sudo apt install xinetd tftpd tftp
+sudo apt install -y xinetd tftpd tftp
 
 #create tftpboot directory
 sudo mkdir /tftpboot
