@@ -1,5 +1,5 @@
 # Go related variables, shouldn't need to be changed
-export GOPATH=$HOME/asic_q2
+export GOPATH=$HOME/ztp_go
 export GOBIN=$GOPATH/bin
 export GOROOT=/usr/local/go
 export PATH=$PATH:$GOPATH/bin

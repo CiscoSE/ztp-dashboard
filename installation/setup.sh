@@ -3,7 +3,7 @@
 # Create the following .env file with the correct variables for your setup
 #--------------------------------------------------------------------------
 # Go related variables, shouldn't need to be changed
-#export GOPATH=$HOME/asic_q2
+#export GOPATH=$HOME/ztp_go
 #export GOBIN=$GOPATH/bin
 #export GOROOT=/usr/local/go
 #export PATH=$PATH:$GOPATH/bin
@@ -43,9 +43,9 @@ echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
 source /etc/profile
 
 #setup go files
-mkdir $HOME/asic_q2
-cp env $HOME/asic_q2/.env
-cd $HOME/asic_q2
+mkdir $HOME/ztp_go
+cp env $HOME/ztp_go/.env
+cd $HOME/ztp_go
 sudo chmod 755 .env
 . .env
 mkdir src
@@ -94,19 +94,19 @@ system_file="/etc/systemd/system/ztp-dashboard.service"
 echo "[Unit]" >> $system_file
 echo "Description=ZTP-dashboard service" >> $system_file
 echo "[Service]" >> $system_file
-echo "ExecStart=$HOME/asic_q2/bin/start-ztp.sh" >> $system_file
+echo "ExecStart=$HOME/ztp_go/bin/start-ztp.sh" >> $system_file
 echo "[Install]" >> $system_file
 echo "WantedBy=multi-user.target" >> $system_file
 
 
 #create a startup file for ztp-dashboard
-cd $HOME/asic_q2/bin
+cd $HOME/ztp_go/bin
 startup_file="start-ztp.sh"
 
 echo "#!/bin/bash" >> $startup_file
-echo "cd $HOME/asic_q2" >> $startup_file
+echo "cd $HOME/ztp_go" >> $startup_file
 echo ". .env" >> $startup_file
-echo "cd $HOME/asic_q2/bin/" >> $startup_file
+echo "cd $HOME/ztp_go/bin/" >> $startup_file
 echo "./ztp-dashboard" >> $startup_file
 
 sudo chmod 755 $startup_file
