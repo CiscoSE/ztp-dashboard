@@ -3,7 +3,7 @@
 # Create the following .env file with the correct variables for your setup
 #--------------------------------------------------------------------------
 # Go related variables, shouldn't need to be changed
-#export GOPATH=$HOME/asic_q2
+#export GOPATH=/opt/ztp-go
 #export GOBIN=$GOPATH/bin
 #export GOROOT=/usr/local/go
 #export PATH=$PATH:$GOPATH/bin
@@ -43,9 +43,10 @@ echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile
 source /etc/profile
 
 #setup go files
-mkdir $HOME/asic_q2
-cd $HOME/asic_q2
-cp .env $HOME/asic_q2
+mkdir /opt/ztp-go
+cp env /opt/ztp-go/.env
+cd /opt/ztp-go
+sudo chmod 755 .env
 . .env
 mkdir src
 mkdir bin
@@ -54,7 +55,7 @@ go get github.com/CiscoSE/ztp-dashboard
 go install github.com/CiscoSE/ztp-dashboard
 
 #install isc-dhcp-server
-sudo apt install isc-dhcp-server
+sudo apt install -y isc-dhcp-server
 
 #start service
 sudo systemctl start isc-dhcp-server.service
@@ -62,7 +63,7 @@ sudo systemctl start isc-dhcp-server6.service
 
 #install tftp server
 
-sudo apt install xinetd tftpd tftp
+sudo apt install -y xinetd tftpd tftp
 
 #create tftpboot directory
 sudo mkdir /tftpboot
@@ -93,19 +94,19 @@ system_file="/etc/systemd/system/ztp-dashboard.service"
 echo "[Unit]" >> $system_file
 echo "Description=ZTP-dashboard service" >> $system_file
 echo "[Service]" >> $system_file
-echo "ExecStart=$HOME/asic_q2/bin/start-ztp.sh" >> $system_file
+echo "ExecStart=/opt/ztp-go/bin/start-ztp.sh" >> $system_file
 echo "[Install]" >> $system_file
 echo "WantedBy=multi-user.target" >> $system_file
 
 
 #create a startup file for ztp-dashboard
-cd $HOME/asic_q2/bin
+cd /opt/ztp-go/bin
 startup_file="start-ztp.sh"
 
 echo "#!/bin/bash" >> $startup_file
-echo "cd $HOME/asic_q2" >> $startup_file
+echo "cd /opt/ztp-go" >> $startup_file
 echo ". .env" >> $startup_file
-echo "cd $HOME/asic_q2/bin/" >> $startup_file
+echo "cd /opt/ztp-go/bin/" >> $startup_file
 echo "./ztp-dashboard" >> $startup_file
 
 sudo chmod 755 $startup_file

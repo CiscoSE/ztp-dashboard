@@ -57,7 +57,7 @@ At this moment, this tool supports Nexus and XR devices only. Demo at https://yo
 The bash script [setup.sh](./installation/setup.sh) under the installation directory can be run to setup the application.  
 The app assumes that there is a Mongo DB reachable, which is configured via env variables.
 
-Also, you need to have an .env file with the following variables inside the installation directory with the setup.sh file:
+Also, you'll need to modify the env file inside the installation directory with the following variables:
 
 ```bash
 # Go related variables, shouldn't need to be changed
